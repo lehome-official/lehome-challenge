@@ -6,8 +6,7 @@ This guide provides step-by-step instructions for manually installing the LeHome
 
 - Python 3.11
 - [uv](https://github.com/astral-sh/uv) package manager
-- CUDA 12.8
-- Git
+- The GPU driver and CUDA follow the official IsaacLab tutorial.
 
 ## Installation Steps
 
@@ -15,7 +14,7 @@ This guide provides step-by-step instructions for manually installing the LeHome
 
 ```bash
 git clone https://github.com/lehome-official/lehome-challenge.git
-cd lehome
+cd lehome-challenge
 ```
 
 ### 2. Install Dependencies with uv
@@ -32,7 +31,6 @@ This will create a virtual environment and install all required dependencies.
 cd third_party
 git clone https://github.com/lehome-official/IsaacLab.git # clone from our repo plz
 cd IsaacLab
-git switch main 
 ```
 
 ### 4. Install IsaacLab
