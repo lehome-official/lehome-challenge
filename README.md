@@ -110,50 +110,46 @@ See [Training Guide](docs/training.md) for complete configuration examples and f
 
 ### 4. Eval
 
-Evaluate your trained policy using the evaluation script. The script supports both **Imitation Learning (IL)** policies (ACT, Diffusion Policy) and **Vision-Language-Action (VLA)** models (SmolVLA).
+Evaluate your trained policy on the challenge garments. The framework supports LeRobot policies (ACT, Diffusion, VLA) and custom implementations.
 
-#### Basic Usage
-
-Evaluate on Release stage (default):
-
-> ⚠️ Note: Here `--device cpu` is only used for simulation to ensure physics stability in Isaac Sim.  
-> The policy will run on the device specified in your training config (e.g., usually `cuda` for GPU).  
+#### Quick Start
 
 ```bash
+# Evaluate LeRobot policy on release stage
 python -m scripts.eval \
+    --policy_type lerobot \
+    --policy_path outputs/train/act_fold/checkpoints/100000/pretrained_model \
+    --dataset_root Datasets/record/001 \
     --stage release \
-    --policy_path outputs/train/act_129/checkpoints/last/pretrained_model \
-    --dataset_root Datasets/record/129 \
-    --num_episodes 5 \
-    --max_steps 600 \
-    --enable_cameras \
-    --device cpu
+    --num_episodes 5
+
+# Evaluate custom policy on single garment
+python -m scripts.eval \
+    --policy_type custom \
+    --policy_path path/to/model.pth \
+    --stage single \
+    --garment_name Top_Long_Unseen_0 \
+    --num_episodes 5
 ```
->
-#### Key Parameters
+
+#### Evaluation Stages
+
+- `--stage release`: Evaluate on all release garments (default)
+- `--stage holdout`: Evaluate on holdout garments (for final testing)
+- `--stage single`: Evaluate on a specific garment (specify with `--garment_name`)
+
+#### Common Options
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `--policy_path` | Path to pretrained policy checkpoint | Required |
-| `--dataset_root` | Training dataset path (for metadata) | Required |
-| `--stage` | Evaluation stage: `release`, `holdout`, or `single` | `release` |
-| `--garment_name` | Garment name (required when `--stage single`) | - |
-| `--task_description` | Task description for VLA models (required for SmolVLA) | `"fold the garment on the table"` |
-| `--num_episodes` | Number of episodes per garment | `5` |
-| `--max_steps` | Maximum steps per episode | `600` |
-| `--step_hz` | Control frequency in Hz | `120` |
+| `--policy_type` | Policy type: `lerobot`, `custom`, `scripted` | `lerobot` |
+| `--policy_path` | Path to model checkpoint | Required |
+| `--dataset_root` | Dataset path (for metadata, LeRobot only) | Required for LeRobot |
+| `--num_episodes` | Episodes per garment | `5` |
+| `--max_steps` | Max steps per episode | `600` |
 | `--save_video` | Save evaluation videos | `False` |
-| `--video_dir` | Directory to save videos | `outputs/eval_videos` |
-| `--save_datasets` | Save successful episodes as dataset | `False` |
-| `--eval_dataset_path` | Path to save evaluation datasets | `datasets/eval` |
-| `--use_ee_pose` | Policy outputs end-effector poses (requires IK) | `False` |
-| `--ee_urdf_path` | URDF path for IK solver (required with `--use_ee_pose`) | `Assets/robots/so101_new_calib.urdf` |
 
-**Notes:**
-- For **Holdout stage**: add `--stage holdout`
-- For **single garment**: add `--stage single --garment_name <name>`
-- For **VLA models (SmolVLA)**: add `--task_description "fold the garment on the table"` (required)
-- For **end-effector pose policies**: add `--use_ee_pose --ee_urdf_path <path>`
+> 📖 **For detailed policy integration guide**, see [scripts/eval_policy/POLICY_GUIDE.md](scripts/eval_policy/POLICY_GUIDE.md)
 
 
 ## 📮 Submission

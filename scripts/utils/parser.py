@@ -455,6 +455,17 @@ def setup_eval_parser() -> argparse.ArgumentParser:
     )
 
     # Policy arguments for Imitation Learning (IL)
+    # Note: Available policy types are dynamically loaded from PolicyRegistry
+    parser.add_argument(
+        "--policy_type",
+        type=str,
+        default="lerobot",
+        help=(
+            "Type of policy to use. Available policies are registered in PolicyRegistry. "
+            "Built-in options: 'lerobot', 'custom', 'scripted'. "
+            "Participants can register their own policies using @PolicyRegistry.register('my_policy')."
+        ),
+    )
     parser.add_argument(
         "--policy_path",
         type=str,
