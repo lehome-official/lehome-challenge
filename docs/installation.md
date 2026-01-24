@@ -29,16 +29,15 @@ This will create a virtual environment and install all required dependencies.
 
 ```bash
 cd third_party
-git clone https://github.com/lehome-official/IsaacLab.git # clone from our repo plz
-
+git clone https://github.com/lehome-official/IsaacLab.git
+cd ..
 ```
 
 ### 4. Install IsaacLab
 
-Return to the project root and install IsaacLab:
+Activate the virtual environment and install IsaacLab:
 
 ```bash
-cd ..
 source .venv/bin/activate
 ./third_party/IsaacLab/isaaclab.sh -i none
 ```
@@ -50,3 +49,14 @@ Finally, install the LeHome package in development mode:
 ```bash
 uv pip install -e ./source/lehome
 ```
+
+---
+
+## Next Steps
+
+Now that you have installed the environment, you can:
+
+- [Prepare Assets and Data](datasets.md)
+- [Start Training](training.md)
+- [Evaluate Policies](../scripts/eval_policy/POLICY_GUIDE.md)
+- [Back to README](../README.md)

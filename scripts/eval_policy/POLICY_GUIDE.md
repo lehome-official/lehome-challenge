@@ -14,8 +14,12 @@ python -m scripts.eval \
     --policy_path outputs/train/act_fold/checkpoints/100000/pretrained_model \
     --dataset_root Datasets/record/001 \
     --stage release \
-    --num_episodes 5
+    --num_episodes 5 \
+    --enable_cameras \
+    --device cpu
 ```
+
+> 💡 **Tip:** Using `--device cpu` ensures the simulator runs on CPU to avoid GUI conflicts in some environments, while the actual policy (LeRobot or Custom) will still be loaded to CUDA for fast inference. `--enable_cameras` is required to see camera views in the GUI or record videos.
 
 **Requirements:**
 - `pretrained_model` directory with config files
@@ -59,6 +63,7 @@ class MyPolicy(BasePolicy):
         Returns:
             action: (action_dim,) float32 - joint angle commands
                 Single-arm: (6,), Dual-arm: (12,)
+                Dim order: [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper]
         """
         # Your inference logic
         action = self.model.predict(observation)
@@ -82,7 +87,9 @@ from .my_policy import MyPolicy
 python -m scripts.eval \
     --policy_type my_policy \
     --stage release \
-    --num_episodes 5
+    --num_episodes 5 \
+    --enable_cameras \
+    --device cpu
 ```
 
 ---
@@ -106,8 +113,8 @@ Optional:
 **Test with built-in policies:**
 
 ```bash
-# Random policy 
-python -m scripts.eval --policy_type custom --stage single --garment_name Top_Long_Unseen_0 --num_episodes 3
+# Random policy (evaluates default garments in the release stage)
+python -m scripts.eval --policy_type custom --stage release --garment_type tops_long --num_episodes 1 --enable_cameras --device cpu
 ```
 
 **Record evaluation videos:**
@@ -118,7 +125,9 @@ python -m scripts.eval \
     --policy_path models/my_model.pth \
     --stage release \
     --save_video \
-    --video_dir outputs/eval_videos
+    --video_dir outputs/eval_videos \
+    --enable_cameras \
+    --device cpu
 ```
 
 ---
@@ -160,8 +169,10 @@ def select_action(self, observation):
 
 ## Reference Files
 
-- `example_participant_policy.py` - Complete implementation examples
-- `base_policy.py` - Interface definition
-- `registry.py` - Registration system
+- [example_participant_policy.py](example_participant_policy.py) - Complete implementation examples
+- [base_policy.py](base_policy.py) - Interface definition
+- [registry.py](registry.py) - Registration system
 
-For more help, visit [LeHome Challenge](https://lehome-challenge.com).
+---
+
+For more help, visit [LeHome Challenge](https://lehome-challenge.com/).

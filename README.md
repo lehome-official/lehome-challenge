@@ -15,7 +15,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![Isaac Lab](https://img.shields.io/badge/Isaac%20Lab-2.3.1-green.svg)](https://isaac-sim.github.io/IsaacLab/main/index.html)
-[![LeRobot](https://img.shields.io/badge/LeRobot-0.4.1-yellow.svg)](https://github.com/huggingface/lerobot)
+[![LeRobot](https://img.shields.io/badge/LeRobot-0.4.2-yellow.svg)](https://github.com/huggingface/lerobot)
 [![License](https://img.shields.io/badge/license-Apache%202.0-red.svg)](LICENSE)
 [![ICRA](https://img.shields.io/badge/ICRA-2026-orange.svg)](https://2026.ieee-icra.org/program/competitions/)
 
@@ -33,6 +33,8 @@
 - [Citation](#-citation)
 
 ## 🚀 Quick Start
+
+> ⚠️ **IMPORTANT**: Before starting, you must download the simulation assets and example datasets from HuggingFace. See [Step 2: Assets & Data Preparation](#2-assets--data-preparation) for instructions.
 
 ### 1. Installation
 We recommend using our official Docker image for development and evaluation to ensure reproducible and consistent environments.
@@ -65,6 +67,7 @@ If you prefer to set up the environment manually or want more customization, ple
 Download the required simulation assets (scenes, objects, robots) from HuggingFace:
 
 ```bash
+# This creates the Assets/ directory with all required simulation resources
 hf download lehome/asset_challenge --repo-type dataset --local-dir Assets
 ```
 
@@ -75,6 +78,8 @@ We provide example demonstration data collected on Release assets. Download from
 ```bash
 hf download lehome/dataset_challenge --repo-type dataset --local-dir Datasets/record/example
 ```
+
+This step is optional if you plan to collect your own data.
 
 #### Collect Your Own Data
 
@@ -115,8 +120,7 @@ Evaluate your trained policy on the challenge garments. The framework supports L
 
 #### Quick Start
 
-```bash
-### Examples
+**Examples:**
 
 ```bash
 # Evaluate LeRobot policy (Recommended)
@@ -124,6 +128,7 @@ Evaluate your trained policy on the challenge garments. The framework supports L
 python -m scripts.eval \
     --policy_type lerobot \
     --policy_path outputs/train/act_fold/checkpoints/100000/pretrained_model \
+    --stage release \
     --garment_type "tops_long" \
     --dataset_root Datasets/record/example/record_top_long_release_10/001 \
     --num_episodes 5 \
@@ -131,18 +136,16 @@ python -m scripts.eval \
     --device cpu
 
 # Evaluate custom policy
-# Note: Participants can define their own model loading logic within the policy class.Provides flexibility for participants to implement specialized loading and inference logic.
+# Note: Participants can define their own model loading logic within the policy class. Provides flexibility for participants to implement specialized loading and inference logic.
 python -m scripts.eval \
     --policy_type custom \
+    --stage release \
     --garment_type "tops_long" \
     --num_episodes 5 \
     --enable_cameras \
     --device cpu
-
 ```
 
-
-```
 #### Common Options
 
 | Parameter | Description | Default | Required For |
@@ -150,10 +153,16 @@ python -m scripts.eval \
 | `--policy_type` | Policy type: `lerobot`, `custom` | `lerobot` | All |
 | `--policy_path` | Path to model checkpoint | - | **LeRobot only** |
 | `--dataset_root` | Dataset path (for metadata) | - | **LeRobot only** |
-| `--garment_type` | Type of garments to evaluate: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | Required | All |
+| `--stage` | Evaluation stage: `release`, `holdout`, `all` | `release` | All |
+| `--garment_type` | Type of garments: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | `tops_long` | All |
 | `--num_episodes` | Episodes per garment | `5` | All |
 | `--max_steps` | Max steps per episode | `600` | All |
 | `--save_video` | Save evaluation videos | `False` | All |
+| `--video_dir` | Directory to save evaluation videos | `outputs/eval_videos` | `--save_video` |
+| `--enable_cameras` | Enable camera rendering | `False` | All |
+| `--device` | Device for inference: `cpu`, `cuda` | `cuda` | All |
+| `--use_ee_pose` | Use end-effector pose control | `False` | All |
+| `--ee_urdf_path` | Robot URDF for IK solver | `Assets/robots/so101_new_calib.urdf` | `--use_ee_pose` |
 
 **Parameter Descriptions:**
 

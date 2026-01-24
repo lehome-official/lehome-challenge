@@ -35,17 +35,15 @@ lerobot-train --config_path=configs/train_act.yaml
 
 ### 2.1 Available Policies
 
-LeHome supports the following official LeRobot policies:
+LeHome currently provides configuration files for the following policies:
 
-| Policy | Type | Description |
-|--------|------|-------------|
-| `act` | Imitation Learning | Action Chunking Transformer |
-| `diffusion` | Imitation Learning | Diffusion Policy |
-| `smolvla` | Vision-Language-Action | Small Vision-Language-Action Model |
-| `pi0` | Vision-Language-Action | π0 Policy |
-| `pi0.5` | Vision-Language-Action | π0.5 Policy |
-| `groot` | Vision-Language-Action | GR00T Policy |
-| `xvla` | Vision-Language-Action | X-VLA Policy |
+| Policy | Type | Description | Config File |
+|--------|------|-------------|-------------|
+| `act` | Imitation Learning | Action Chunking Transformer | `configs/train_act.yaml` |
+| `diffusion` | Imitation Learning | Diffusion Policy | `configs/train_dp.yaml` |
+| `smolvla` | Vision-Language-Action | Small Vision-Language-Action Model | `configs/train_smolvla.yaml` |
+
+> 💡 **Note**: LeRobot supports additional policies (π0, π0.5, GR00T, X-VLA), but configuration files for these are not provided in this repository. You can create custom configuration files following the [LeRobot documentation](https://huggingface.co/docs/lerobot) or use the above three baseline policies.
 
 ### 2.2 Basic Training Command
 
@@ -372,5 +370,5 @@ For specific questions about custom policy integration with the LeHome environme
 - [Dataset Collection and Processing Guide](datasets.md)
 - [Installation Guide](installation.md)
 - [LeRobot Official Documentation](https://huggingface.co/docs/lerobot)
-- [Competition Website](https://lehome-challenge.github.io/)
+- [Competition Website](https://lehome-challenge.com/)
 

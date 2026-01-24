@@ -451,7 +451,7 @@ def setup_eval_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--eval_dataset_path",
         type=str,
-        default="datasets/eval",
+        default="Datasets/eval",
         help="Path to save evaluation datasets.",
     )
 
@@ -486,7 +486,7 @@ def setup_eval_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ee_urdf_path",
         type=str,
-        default="Assets/SO101/so101_new_calib.urdf",
+        default="Assets/robots/so101_new_calib.urdf",
         help="URDF path for IK solver (required when --use_ee_pose is set).",
     )
 

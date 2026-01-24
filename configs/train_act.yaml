@@ -26,7 +26,7 @@ policy:
       type: ACTION
       shape: [12]
 
-output_dir: Outputs/train/act
+output_dir: outputs/train/act
 batch_size: 16
 steps: 30000
 save_freq: 5000

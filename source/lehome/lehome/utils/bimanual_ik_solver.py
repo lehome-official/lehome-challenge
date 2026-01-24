@@ -25,7 +25,7 @@ class BimanualIKSolver:
     
     Example:
         >>> solver = BimanualIKSolver(
-        ...     urdf_path="Assets/SO101/so101_new_calib.urdf",
+        ...     urdf_path="Assets/robots/so101_new_calib.urdf",
         ...     left_base_pose=([1.15, -2.3, 0.5], [0.707, 0, 0, 0.707]),
         ...     right_base_pose=([1.65, -2.3, 0.5], [0.707, 0, 0, 0.707])
         ... )
@@ -267,7 +267,7 @@ def solve_bimanual_ik_simple(
     Example:
         >>> from lehome.utils.bimanual_ik_solver import solve_bimanual_ik_simple
         >>> joints = solve_bimanual_ik_simple(
-        ...     "Assets/SO101/so101_new_calib.urdf",
+        ...     "Assets/robots/so101_new_calib.urdf",
         ...     [1.65, -2.03, 0.8],
         ...     arm='right'
         ... )
