@@ -208,15 +208,23 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
     policy_kwargs = {"device": device}
     
     if args.policy_type == "lerobot":
+        # LeRobot policy requires policy_path and dataset_root
+        if not args.policy_path:
+            raise ValueError("--policy_path is required for lerobot policy type")
+        if not args.dataset_root:
+            raise ValueError("--dataset_root is required for lerobot policy type")
         policy_kwargs.update({
             "policy_path": args.policy_path,
             "dataset_root": args.dataset_root,
             "task_description": args.task_description,
         })
-    elif args.policy_type in ["custom"]:
-        policy_kwargs.update({
-            "model_path": args.policy_path,
-        })
+    else:
+        # Custom policy: participants can define their own loading logic
+        # policy_path is optional and only passed if provided
+        if args.policy_path:
+            policy_kwargs.update({
+                "model_path": args.policy_path,
+            })
     
     # Create policy from registry
     policy = PolicyRegistry.create(args.policy_type, **policy_kwargs)

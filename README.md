@@ -116,7 +116,11 @@ Evaluate your trained policy on the challenge garments. The framework supports L
 #### Quick Start
 
 ```bash
-# Evaluate LeRobot policy on specified garments
+### Examples
+
+```bash
+# Evaluate LeRobot policy (Recommended)
+# Note: --policy_path and --dataset_root are required parameters for LeRobot policies, ready to run once the dataset and model checkpoints are prepared.
 python -m scripts.eval \
     --policy_type lerobot \
     --policy_path outputs/train/act_fold/checkpoints/100000/pretrained_model \
@@ -126,26 +130,36 @@ python -m scripts.eval \
     --enable_cameras \
     --device cpu
 
-# Evaluate custom policy on specified garments
+# Evaluate custom policy
+# Note: Participants can define their own model loading logic within the policy class.Provides flexibility for participants to implement specialized loading and inference logic.
 python -m scripts.eval \
     --policy_type custom \
-    --policy_path path/to/model.pth \
     --garment_type "tops_long" \
     --num_episodes 5 \
     --enable_cameras \
     --device cpu
+
+```
+
+
 ```
 #### Common Options
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `--policy_type` | Policy type: `lerobot`, `custom` | `lerobot` |
-| `--policy_path` | Path to model checkpoint | Required |
-| `--garment_type` | Type of garments or to evaluate: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | Required |
-| `--dataset_root` | Dataset path (for metadata, LeRobot only) | Required for LeRobot |
-| `--num_episodes` | Episodes per garment | `5` |
-| `--max_steps` | Max steps per episode | `600` |
-| `--save_video` | Save evaluation videos | `False` |
+| Parameter | Description | Default | Required For |
+|-----------|-------------|---------|--------------|
+| `--policy_type` | Policy type: `lerobot`, `custom` | `lerobot` | All |
+| `--policy_path` | Path to model checkpoint | - | **LeRobot only** |
+| `--dataset_root` | Dataset path (for metadata) | - | **LeRobot only** |
+| `--garment_type` | Type of garments to evaluate: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | Required | All |
+| `--num_episodes` | Episodes per garment | `5` | All |
+| `--max_steps` | Max steps per episode | `600` | All |
+| `--save_video` | Save evaluation videos | `False` | All |
+
+**Parameter Descriptions:**
+
+* **Required for LeRobot Policy**: `--policy_path` (model path) and `--dataset_root` (dataset path, used for loading metadata).
+* **Custom Policy**: `--policy_path` is not required; participants are free to define their own model loading logic within their policy class (refer to `scripts/eval_policy/example_participant_policy.py`).
+
 
 #### Garment Test Configuration
 Under the directory `Assets/objects/Challenge_Garment/Release`, each garment category folder contains a corresponding text file listing the garment names (e.g., `Tops_Long/Tops_Long.txt` contains Top_Long_Seen_0, Top_Long_Seen_1, etc.). You can set --garment_type to `tops_long` to evaluate all garments within the `Tops_Long` category. The same logic applies to all other garment types.

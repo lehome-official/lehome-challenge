@@ -81,7 +81,6 @@ from .my_policy import MyPolicy
 ```bash
 python -m scripts.eval \
     --policy_type my_policy \
-    --policy_path models/my_model.pth \
     --stage release \
     --num_episodes 5
 ```

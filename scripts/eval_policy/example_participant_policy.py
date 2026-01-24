@@ -31,6 +31,13 @@ class CustomPolicy(BasePolicy):
         
         Args:
             model_path: Path to model weights (optional).
+                Note: Custom policies do not necessarily need to receive the model_path via command-line arguments. 
+                You are free to define how your model is loaded, for example:
+                - Command-line arguments
+                - Reading the path from environment variables
+                - Using a hard-coded path
+                - Loading from a configuration file
+                - Or not requiring an external model file at all
             device: Device to use ('cpu' or 'cuda').
             **kwargs: Additional arguments.
         """
@@ -39,7 +46,8 @@ class CustomPolicy(BasePolicy):
         self.model_path = model_path
         
         # TODO: Load your model here
-        # Example:
+        # Note: You are not restricted to using the model_path parameter; you can define any loading logic.
+        # Example 1: Load from model_path (if provided)
         # import torch
         # self.model = YourModel()
         # if model_path:
@@ -47,6 +55,14 @@ class CustomPolicy(BasePolicy):
         #     self.model.load_state_dict(checkpoint)
         # self.model.to(device)
         # self.model.eval()
+        #
+        # Example 2: Load from environment variables or a config file
+        # import os
+        # model_path = os.getenv("MY_MODEL_PATH", "default/path/to/model.pth")
+        # self.model = load_model(model_path)
+        #
+        # Example 3: Hard-coded path
+        # self.model = load_model("path/to/your/model.pth")
         
         # Example: Maintain observation history (for temporal policies like RNN/Transformer)
         self.observation_history = []
