@@ -129,7 +129,6 @@ python -m scripts.eval \
 python -m scripts.eval \
     --policy_type custom \
     --policy_path path/to/model.pth \
-    --stage release \
     --num_episodes 5 \
     --enable_cameras \
     --device cpu
