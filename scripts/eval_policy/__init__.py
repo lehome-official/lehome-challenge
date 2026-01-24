@@ -10,12 +10,11 @@ from .registry import PolicyRegistry
 
 # Import policy implementations (this will auto-register them)
 from .lerobot_policy import LeRobotPolicy
-from .example_participant_policy import CustomPolicy, ScriptedPolicy
+from .example_participant_policy import CustomPolicy
 
 __all__ = [
     "BasePolicy", 
     "PolicyRegistry",
     "LeRobotPolicy", 
     "CustomPolicy", 
-    "ScriptedPolicy"
 ]

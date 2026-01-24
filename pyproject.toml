@@ -3,10 +3,10 @@ name = "lehome"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 dependencies = [
     "isaacsim[all,extscache]==5.1.0",
-    "lerobot==0.4.1",
+    "lerobot==0.4.2",
     "open3d>=0.19.0",
     "pinocchio>=0.4.3",
     "pip>=25.3",

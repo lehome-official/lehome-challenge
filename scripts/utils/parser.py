@@ -456,7 +456,7 @@ def setup_eval_parser() -> argparse.ArgumentParser:
         default="lerobot",
         help=(
             "Type of policy to use. Available policies are registered in PolicyRegistry. "
-            "Built-in options: 'lerobot', 'custom', 'scripted'. "
+            "Built-in options: 'lerobot', 'custom'. "
             "Participants can register their own policies using @PolicyRegistry.register('my_policy')."
         ),
     )

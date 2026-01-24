@@ -217,7 +217,6 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
         policy_kwargs.update({
             "model_path": args.policy_path,
         })
-    # scripted policy doesn't need additional arguments
     
     # Create policy from registry
     policy = PolicyRegistry.create(args.policy_type, **policy_kwargs)

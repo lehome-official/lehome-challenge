@@ -142,7 +142,7 @@ To test a specific subset of garments, you can modify `Assets/objects/Challenge_
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `--policy_type` | Policy type: `lerobot`, `custom`, `scripted` | `lerobot` |
+| `--policy_type` | Policy type: `lerobot`, `custom` | `lerobot` |
 | `--policy_path` | Path to model checkpoint | Required |
 | `--dataset_root` | Dataset path (for metadata, LeRobot only) | Required for LeRobot |
 | `--num_episodes` | Episodes per garment | `5` |
@@ -165,6 +165,7 @@ This project stands on the shoulders of giants. We utilize and build upon the fo
 - **[Isaac Sim](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/index.html)** - For photorealistic physics simulation
 - **[Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html)** - For modular robot learning environments
 - **[LeRobot](https://github.com/huggingface/lerobot)** - For state-of-the-art Imitation Learning algorithms
+- **[Marble](https://marble.worldlabs.ai/)** - For diverse simulation scene generation
 
 ## 🖊️ Citation
 
