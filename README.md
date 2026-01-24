@@ -23,24 +23,34 @@
 
 ## 📑 Table of Contents
 
-- [Quick Start](#-quick-start)
-  - [Installation](#1-installation)
-  - [Assets & Data Preparation](#2-assets--data-preparation)
-  - [Train](#3-train)
-  - [Eval](#4-eval)
-- [Submission](#-submission)
-- [Acknowledgments](#-acknowledgments)
-- [Citation](#-citation)
+- [📑 Table of Contents](#-table-of-contents)
+- [🚀 Quick Start](#-quick-start)
+  - [1. Installation](#1-installation)
+    - [Use Docker](#use-docker)
+    - [Use UV](#use-uv)
+  - [2. Assets \& Data Preparation](#2-assets--data-preparation)
+    - [Download Simulation Assets](#download-simulation-assets)
+    - [Download Example Dataset](#download-example-dataset)
+    - [Collect Your Own Data](#collect-your-own-data)
+  - [3. Train](#3-train)
+    - [Quick Start](#quick-start)
+  - [4. Eval](#4-eval)
+    - [Quick Start](#quick-start-1)
+    - [Common Options](#common-options)
+    - [Garment Test Configuration](#garment-test-configuration)
+- [📮 Submission](#-submission)
+- [🧩 Acknowledgments](#-acknowledgments)
+- [🖊️ Citation](#️-citation)
 
 ## 🚀 Quick Start
 
 > ⚠️ **IMPORTANT**: Before starting, you must download the simulation assets and example datasets from HuggingFace. See [Step 2: Assets & Data Preparation](#2-assets--data-preparation) for instructions.
 
 ### 1. Installation
-We recommend using our official Docker image for development and evaluation to ensure reproducible and consistent environments.
-***But!!! Docker is not ready yet; please use uv for Manual Installation for now.***
+We offer two deployment methods: Docker and UV. Docker is required when submitting your application, so we recommend the former.
+***Docker is not ready yet; please use uv for Manual Installation for now.***
 
-#### Recommended: Use Docker (Quick Start)
+#### Use Docker
 
 1. **Pull the official competition Docker image**
    ```bash
@@ -56,7 +66,7 @@ We recommend using our official Docker image for development and evaluation to e
      lehome/competition:latest
    ```
 
-#### Manual Installation (Step-by-step)
+#### Use UV
 
 If you prefer to set up the environment manually or want more customization, please refer to our [step-by-step installation guide](docs/installation.md).
 
