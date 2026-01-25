@@ -180,7 +180,7 @@ def setup_replay_parser(
     parser.add_argument(
         "--dataset_root",
         type=str,
-        default="Datasets/record/001",
+        default="Datasets/record/example/record_top_long_release_10/001",
         help="Root directory of the dataset to replay.",
     )
     parser.add_argument(
@@ -218,12 +218,6 @@ def setup_replay_parser(
         type=str,
         default="fold the garment on the table",
         help="Description of the task to be performed.",
-    )
-    parser.add_argument(
-        "--garment_name",
-        type=str,
-        default="Top_Long_Unseen_0",
-        help="Name of the garment.",
     )
     parser.add_argument(
         "--garment_version", type=str, default="Release", help="Version of the garment."
