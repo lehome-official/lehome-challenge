@@ -25,7 +25,7 @@ class CustomPolicy(BasePolicy):
         action = policy.select_action(observation)
     """
     
-    def __init__(self, model_path: Optional[str] = None, device: str = "cuda", is_bimanual: bool = False, **kwargs):
+    def __init__(self, model_path: Optional[str] = None, device: str = "cuda", **kwargs):
         """
         Initialize the policy.
         
@@ -39,13 +39,11 @@ class CustomPolicy(BasePolicy):
                 - Loading from a configuration file
                 - Or not requiring an external model file at all
             device: Device to use ('cpu' or 'cuda').
-            is_bimanual: Whether the task is bimanual (passed from evaluation script).
             **kwargs: Additional arguments.
         """
         super().__init__(**kwargs)
         self.device = device
         self.model_path = model_path
-        self.is_bimanual = is_bimanual
         
         # TODO: Load your model here
         # Note: You are not restricted to using the model_path parameter; you can define any loading logic.
@@ -140,12 +138,12 @@ class CustomPolicy(BasePolicy):
         # action = action_tensor.cpu().numpy()
         
         # ===== Current Implementation: Random Policy (For Demonstration) =====
-        # Infer action dimension
+        # Infer action dimension from state dimension
         if "observation.state" in observation:
             action_dim = observation["observation.state"].shape[0]
         else:
-            # Fallback based on task type
-            action_dim = 12 if self.is_bimanual else 6
+            # Default to dual-arm if state is missing
+            action_dim = 12
             
         # Generate random action (small magnitude to avoid violent movement)
         # Note: Replace this with your actual model inference logic

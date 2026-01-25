@@ -208,7 +208,6 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
     # Different policies may require different initialization arguments
     policy_kwargs = {
         "device": device,
-        "is_bimanual": is_bimanual,
     }
     
     if args.policy_type == "lerobot":

@@ -43,10 +43,9 @@ from scripts.eval_policy.registry import PolicyRegistry
 
 @PolicyRegistry.register("my_policy")
 class MyPolicy(BasePolicy):
-    def __init__(self, model_path=None, device="cuda", is_bimanual=False, **kwargs):
+    def __init__(self, model_path=None, device="cuda", **kwargs):
         super().__init__(**kwargs)
         self.device = device
-        self.is_bimanual = is_bimanual
         # Load your model here
         
     def reset(self):
