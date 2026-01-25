@@ -26,11 +26,11 @@ policy:
       type: ACTION
       shape: [12]
 
-output_dir: outputs/train/act
+output_dir: outputs/train/act_top_long
 batch_size: 16
 steps: 30000
-save_freq: 5000
-log_freq: 1000
+save_freq: 50
+log_freq: 10
 
 wandb:
   enable: false

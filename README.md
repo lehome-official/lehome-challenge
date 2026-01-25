@@ -139,10 +139,10 @@ Evaluate your trained policy on the challenge garments. The framework supports L
 # Note: --policy_path and --dataset_root are required parameters for LeRobot policies, ready to run once the dataset and model checkpoints are prepared.
 python -m scripts.eval \
     --policy_type lerobot \
-    --policy_path outputs/train/act \
+    --policy_path outputs/train/act_top_long/checkpoints/last/pretrained_model \
     --garment_type "tops_long" \
-    --dataset_root Datasets/example/top_long \
-    --num_episodes 5 \
+    --dataset_root Datasets/example/top_long_merged \
+    --num_episodes 2 \
     --enable_cameras \
     --device cpu
 
