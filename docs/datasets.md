@@ -19,6 +19,7 @@ This guide covers how to collect teleoperation demonstration data and process da
   - [4.3 Add End-Effector Pose](#43-add-end-effector-pose)
   - [4.4 Add PointCloud](#44-add-pointcloud)
   - [4.5 Replay Dataset](#45-replay-dataset)
+  - [4.6 Remove Features](#46-remove-features)
 - [5. Dataset Merging](#5-dataset-merging)
 - [6. Dataset Format](#6-dataset-format)
   - [6.1 Data Features](#61-data-features)
@@ -301,39 +302,117 @@ python -m scripts.dataset_sim replay \
 - **End-Effector Pose Control**: Requires dataset with `action.ee_pose` field (recorded with `--record_ee_pose` or augmented using `augment_ee_pose`)
 - **IK Statistics**: When using `--use_ee_pose`, IK success rate and error statistics are displayed
 
-## 5. Dataset Merging
+### 4.6 Remove Features
 
-Merge multiple datasets collected from different sessions into a single unified dataset:
+Remove specific features from datasets (e.g., depth maps to reduce storage):
+
+**Remove a single feature:**
 
 ```bash
-python -m scripts.dataset merge \
-    --source_roots "['Datasets/record/001', 'Datasets/record/002', 'Datasets/record/003']" \
-    --output_root "Datasets/record/merged" \
-    --output_repo_id "merged_dataset"
+lerobot-edit-dataset \
+    --repo_id record_top_long_release_10/001 \
+    --root Datasets/record/record_top_long_release_10/001 \
+    --new_repo_id record_top_long_release_10/001_no_depth \
+    --operation.type remove_feature \
+    --operation.feature_names "['observation.top_depth']"
+```
+
+**Batch remove features from multiple datasets:**
+
+```bash
+cd Datasets/record/record_top_long_release_10
+
+for i in {001..010}; do
+    lerobot-edit-dataset \
+        --repo_id record_top_long_release_10/$i \
+        --root Datasets/record/record_top_long_release_10/$i \
+        --new_repo_id record_top_long_release_10/${i}_no_depth \
+        --operation.type remove_feature \
+        --operation.feature_names "['observation.top_depth']"
+done
 ```
 
 **Parameters:**
+- `--repo_id`: Dataset identifier. Used as a label in metadata and for downloading from HuggingFace Hub if local files are not found. When `--root` is specified, it doesn't affect the actual file path.
+- `--root`: Dataset root directory path (relative or absolute). This determines where the dataset files are actually located.
+- `--new_repo_id`: New dataset identifier (optional, if omitted, original dataset is renamed to `_old`)
+- `--operation.type`: Operation type, use `remove_feature`
+- `--operation.feature_names`: List of feature names to remove (Python list format)
 
-- `--source_roots` (required): List of source dataset directories (as Python list string, e.g., `"['path1', 'path2']"`)
-- `--output_root` (required): Output directory for merged dataset
-- `--output_repo_id` (optional): Repository ID for merged dataset (default: `"merged_dataset"`)
-- `--merge_custom_meta` (optional): Merge custom meta files (`garment_info.json`) - enabled by default
+**Notes:**
+- Cannot remove required features: `timestamp`, `frame_index`, `episode_index`, `index`, `task_index`
+- If `--new_repo_id` is specified, original dataset remains unchanged
+- Multiple features can be removed: `"['feature1', 'feature2']"`
 
-**What the merge script does:**
+## 5. Dataset Merging
 
-1. Validates all source datasets exist and have valid meta directories
-2. Loads all source datasets using LeRobot dataset loader
-3. Combines all episodes from source datasets sequentially
-4. Re-indexes episodes sequentially (episode 0, 1, 2, ...)
-5. Merges custom metadata (`garment_info.json`) with proper episode offset adjustment
-6. Creates a unified dataset ready for training
+Merge multiple datasets collected from different sessions into a single unified dataset.
+
+**Using Python script:**
+
+```python
+from pathlib import Path
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.dataset_tools import merge_datasets
+from lerobot.utils.utils import init_logging
+
+init_logging()
+
+# Specify paths to datasets you want to merge
+dataset_paths = [
+    Path("Datasets/record/record_top_long_release_10_no_depth_all/001_no_depth"),
+    Path("Datasets/record/record_top_long_release_10_no_depth_all/002_no_depth"),
+    Path("Datasets/record/record_top_long_release_10_no_depth_all/003_no_depth"),
+    # Add more dataset paths as needed
+]
+
+# Output configuration
+output_dir = Path("Datasets/record/top_long_merged")
+output_repo_id = "top_long_merged"
+
+# Load datasets
+datasets = [
+    LeRobotDataset(f"ds_{i:03d}", root=p) 
+    for i, p in enumerate(dataset_paths, 1)
+]
+
+# Merge datasets
+merged = merge_datasets(datasets, output_repo_id, output_dir)
+print(f"✓ Merged! Episodes: {merged.meta.total_episodes}, Frames: {merged.meta.total_frames}")
+```
+
+**One-liner command:**
+
+```bash
+python -c "
+from pathlib import Path
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.dataset_tools import merge_datasets
+from lerobot.utils.utils import init_logging
+
+init_logging()
+
+# Specify dataset paths to merge
+dataset_paths = [
+    Path('Datasets/record/record_top_long_release_10_no_depth_all/001_no_depth'),
+    Path('Datasets/record/record_top_long_release_10_no_depth_all/002_no_depth'),
+    Path('Datasets/record/record_top_long_release_10_no_depth_all/003_no_depth'),
+]
+
+output_dir = Path('Datasets/record/top_long_merged')
+datasets = [LeRobotDataset(f'ds_{i:03d}', root=p) for i, p in enumerate(dataset_paths, 1)]
+
+merged = merge_datasets(datasets, 'top_long_merged', output_dir)
+print(f'✓ Merged! Episodes: {merged.meta.total_episodes}, Frames: {merged.meta.total_frames}')
+"
+```
 
 **Notes:**
 
-- All source datasets must have valid `meta/info.json` files
-- If a source dataset doesn't have `garment_info.json`, it will be skipped with a warning
-- Episode indices in `garment_info.json` are automatically adjusted to match the merged dataset
-- The merged dataset maintains the same structure as individual datasets
+- All source datasets must have **identical feature structures** (except for removed features)
+- Merged dataset contains all episodes from source datasets in sequential order
+- Video files are automatically split into multiple files based on size limit (default: 200MB)
+- Data files are automatically split into multiple files based on size limit (default: 100MB)
 
 ## 6. Dataset Format
 
