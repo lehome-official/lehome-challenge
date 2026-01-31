@@ -148,10 +148,10 @@ python -m scripts.eval \
 | `--garment_type` | Type of garments: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | `tops_long` | All |
 | `--num_episodes` | Episodes per garment | `5` | All |
 | `--max_steps` | Max steps per episode | `600` | All |
-| `--save_video` | Save evaluation videos | All |
+| `--save_video` | Save evaluation videos | | All |
 | `--video_dir` | Directory to save evaluation videos | `outputs/eval_videos` | `--save_video` |
-| `--enable_cameras` | Enable camera rendering | `True` | All |
-| `--device` | Device for inference: only `cpu` | All |
+| `--enable_cameras` | Enable camera rendering | | All |
+| `--device` | Device for inference: only `cpu` |'cpu'| All |
 
 **Parameter Descriptions:**
 
