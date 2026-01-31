@@ -26,8 +26,8 @@
 - [📑 Table of Contents](#-table-of-contents)
 - [🚀 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
-    - [Use Docker](#use-docker)
     - [Use UV](#use-uv)
+    - [Use Docker](#use-docker)
   - [2. Assets \& Data Preparation](#2-assets--data-preparation)
     - [Download Simulation Assets](#download-simulation-assets)
     - [Download Example Dataset](#download-example-dataset)
@@ -44,18 +44,18 @@
 ## 🚀 Quick Start
 
 > ⚠️ **IMPORTANT**: 
-> For Ubuntu version and GPU-related settings, please refer to the [IsaacSim 5.1.0 Documentation](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/requirements.html).
+> For Ubuntu version and GPU-related settings, please refer to the [IsaacSim 5.1.0 Documentation](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/requirements.html). And the simulation currently only supports CPU devices.
 
 ### 1. Installation
-We offer two installation methods: Docker and UV for submission and local evaluation.
-
-#### Use Docker
-
-***Docker is not ready yet; please use uv for Installation for now.***
+We offer two installation methods: UV and Docker for submission and local evaluation.
 
 #### Use UV
 
 The simulation environment is based on the IssacLab and LeRobot repositories; please refer to [UV installation guide](docs/installation.md).
+
+#### Use Docker
+
+***Docker is not ready yet; please use uv for Installation for now.***
 
 ### 2. Assets & Data Preparation
 
@@ -126,7 +126,7 @@ python -m scripts.eval \
     --dataset_root Datasets/example/top_long_merged \
     --num_episodes 2 \
     --enable_cameras \
-    --device cpu
+    --device cpu    
 
 # Evaluate custom policy
 # Note: Participants can define their own model loading logic within the policy class. Provides flexibility for participants to implement specialized loading and inference logic.
@@ -148,12 +148,10 @@ python -m scripts.eval \
 | `--garment_type` | Type of garments: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | `tops_long` | All |
 | `--num_episodes` | Episodes per garment | `5` | All |
 | `--max_steps` | Max steps per episode | `600` | All |
-| `--save_video` | Save evaluation videos | `False` | All |
+| `--save_video` | Save evaluation videos | All |
 | `--video_dir` | Directory to save evaluation videos | `outputs/eval_videos` | `--save_video` |
 | `--enable_cameras` | Enable camera rendering | `True` | All |
-| `--device` | Device for inference: `cpu`, `cuda` | `cuda` | All |
-| `--use_ee_pose` | Use end-effector pose control | `False` | All |
-| `--ee_urdf_path` | Robot URDF for IK solver | `Assets/robots/so101_new_calib.urdf` | `--use_ee_pose` |
+| `--device` | Device for inference: only `cpu` | All |
 
 **Parameter Descriptions:**
 

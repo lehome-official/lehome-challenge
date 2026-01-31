@@ -4,27 +4,29 @@ This guide covers how to collect teleoperation demonstration data and process da
 
 ## Table of Contents
 
-- [1. Overview](#1-overview)
-- [2. Hardware Setup](#2-hardware-setup)
-  - [2.1 Hardware Connection](#21-hardware-connection)
-  - [2.2 Calibration](#22-calibration)
-  - [2.3 Verify Calibration](#23-verify-calibration)
-- [3. Teleoperation Data Collection](#3-teleoperation-data-collection)
-  - [3.1 Basic Recording Command](#31-basic-recording-command)
-  - [3.2 Parameter Configuration](#32-parameter-configuration)
-  - [3.3 Recording Controls](#33-recording-controls)
-- [4. Dataset Inspection and Processing](#4-dataset-inspection-and-processing)
-  - [4.1 Inspect Dataset](#41-inspect-dataset)
-  - [4.2 Read Dataset States](#42-read-dataset-states)
-  - [4.3 Add End-Effector Pose](#43-add-end-effector-pose)
-  - [4.4 Add PointCloud](#44-add-pointcloud)
-  - [4.5 Replay Dataset](#45-replay-dataset)
-  - [4.6 Remove Features](#46-remove-features)
-- [5. Dataset Merging](#5-dataset-merging)
-- [6. Dataset Format](#6-dataset-format)
-  - [6.1 Data Features](#61-data-features)
-  - [6.2 Metadata](#62-metadata)
-- [7. Best Practices](#7-best-practices)
+- [Dataset Collection and Processing Guide](#dataset-collection-and-processing-guide)
+  - [Table of Contents](#table-of-contents)
+  - [1. Overview](#1-overview)
+  - [2. Hardware Setup](#2-hardware-setup)
+    - [2.1 Hardware Connection](#21-hardware-connection)
+    - [2.2 Calibration](#22-calibration)
+    - [2.3 Verify Calibration](#23-verify-calibration)
+  - [3. Teleoperation Data Collection](#3-teleoperation-data-collection)
+    - [3.1 Basic Recording Command](#31-basic-recording-command)
+    - [3.2 Parameter Configuration](#32-parameter-configuration)
+    - [3.3 Recording Controls](#33-recording-controls)
+  - [4. Dataset Inspection and Processing](#4-dataset-inspection-and-processing)
+    - [4.1 Inspect Dataset](#41-inspect-dataset)
+    - [4.2 Read Dataset States](#42-read-dataset-states)
+    - [4.3 Add End-Effector Pose](#43-add-end-effector-pose)
+    - [4.4 Add PointCloud](#44-add-pointcloud)
+    - [4.5 Replay Dataset](#45-replay-dataset)
+    - [4.6 Remove Features](#46-remove-features)
+  - [5. Dataset Merging](#5-dataset-merging)
+  - [6. Dataset Format](#6-dataset-format)
+    - [6.1 Data Features](#61-data-features)
+    - [6.2 Metadata](#62-metadata)
+  - [7. Best Practices](#7-best-practices)
 
 ## 1. Overview
 
@@ -168,7 +170,7 @@ python -m scripts.dataset_sim record \
 |-----------|---------|-------------|
 | `--enable_cameras` | False | Enable camera rendering |
 | `--headless` | False | Run in headless mode (no GUI) |
-| `--device` | `cuda:0` | Simulation device (`cpu` or `cuda:0`). Use `cpu` to avoid garment physics issues |
+| `--device` | `cpu` |  Use `cpu` to avoid garment physics issues |
 
 ### 3.3 Recording Controls
 
