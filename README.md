@@ -39,7 +39,6 @@
     - [Garment Test Configuration](#garment-test-configuration)
 - [📮 Submission](#-submission)
 - [🧩 Acknowledgments](#-acknowledgments)
-- [🖊️ Citation](#️-citation)
 
 ## 🚀 Quick Start
 
@@ -182,18 +181,3 @@ This project stands on the shoulders of giants. We utilize and build upon the fo
 - **[Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html)** - For modular robot learning environments
 - **[LeRobot](https://github.com/huggingface/lerobot)** - For state-of-the-art Imitation Learning algorithms
 - **[Marble](https://marble.worldlabs.ai/)** - For diverse simulation scene generation
-
-## 🖊️ Citation
-
-If you use this framework for your research or participate in the competition, please cite our work:
-
-```bibtex
-@inproceedings{
-li2025lehome,
-title={LeHome: A Simulation Environment for Deformable Object Manipulation in Household Scenarios},
-author={Zeyi Li and Jade Yang and Jingkai Xu and Shangbin Xie and Yuran Wang and Zhenhao Shen and Tianxing Chen and Yan Shen and Wenjun Li and Yukun Zheng and Chaorui Zhang and Ming Chen and Chen Xie and Ruihai Wu},
-booktitle={IROS 2025 - 5th Workshop on RObotic MAnipulation of Deformable Objects: holistic approaches and challenges forward},
-year={2025},
-url={https://openreview.net/forum?id=rEDd1HorJl}
-}
-```
