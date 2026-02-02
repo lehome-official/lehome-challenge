@@ -26,7 +26,7 @@ class GarmentEnvCfg(DirectRLEnvCfg):
         dt=1 / 90,
         render_interval=decimation,
         render=render_cfg,
-        use_fabric=False,
+        use_fabric=True,
     )
     # garment_name (str): Garment name in the format "Type_Length_Seen/Unseen_Index",
     # e.g., "Top_Long_Unseen_0", "Top_Short_Seen_1",
@@ -44,30 +44,32 @@ class GarmentEnvCfg(DirectRLEnvCfg):
     left_robot: ArticulationCfg = SO101_FOLLOWER_CFG.replace(
         prim_path="/World/Robot/Left_Robot",
         init_state=SO101_FOLLOWER_CFG.init_state.replace(
-            pos=(-0.23, -0.25, 0.5), rot=(0.0, 0.0, 0.0, 1.0),
+            pos=(-0.23, -0.25, 0.5),
+            rot=(0.0, 0.0, 0.0, 1.0),
             joint_pos={
-            "shoulder_pan": -1.1363,
-            "shoulder_lift": 0.0,
-            "elbow_flex": 0.0,
-            "wrist_flex": 0.0,
-            "wrist_roll": 0.0,
-            "gripper": 0.0,
-        },
+                "shoulder_pan": -1.1363,
+                "shoulder_lift": 0.0,
+                "elbow_flex": 0.0,
+                "wrist_flex": 0.0,
+                "wrist_roll": 0.0,
+                "gripper": 0.0,
+            },
         ),  # (pos=(2.7, -2.76, 0.21),
         # rot=(0.707, 0.0, 0.0, 0.707) )
     )
     right_robot: ArticulationCfg = SO101_FOLLOWER_CFG.replace(
         prim_path="/World/Robot/Right_Robot",
         init_state=SO101_FOLLOWER_CFG.init_state.replace(
-            pos=(0.23, -0.25, 0.5), rot=(0.0, 0.0, 0.0, 1.0),
+            pos=(0.23, -0.25, 0.5),
+            rot=(0.0, 0.0, 0.0, 1.0),
             joint_pos={
-            "shoulder_pan": 1.1363,
-            "shoulder_lift": 0.0,
-            "elbow_flex": 0.0,
-            "wrist_flex": 0.0,
-            "wrist_roll": 0.0,
-            "gripper": 0.0,
-        },
+                "shoulder_pan": 1.1363,
+                "shoulder_lift": 0.0,
+                "elbow_flex": 0.0,
+                "wrist_flex": 0.0,
+                "wrist_roll": 0.0,
+                "gripper": 0.0,
+            },
         ),  # (pos=(2.7, -3.11, 0.21),
         # rot=(0.707, 0.0, 0.0, 0.707) )
     )

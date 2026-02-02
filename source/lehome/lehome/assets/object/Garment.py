@@ -240,7 +240,9 @@ class GarmentObject(SingleClothPrim):
         else:
             logger.warning("[GarmentObject] No visual materials specified")
 
-        self.set_world_pose(position=self.init_pos, orientation=self.init_ori)
+        self.world_prim.set_world_pose(
+            position=self.init_pos, orientation=self.init_ori
+        )
         logger.debug("[GarmentObject] Garment object initialized successfully")
 
     def _validate_configs(
@@ -356,7 +358,9 @@ class GarmentObject(SingleClothPrim):
         while also get initial info of particles that make up the object.
         """
         # set local pose for initialization (wait for the update of scene manager)
-        self.set_world_pose(position=self.init_pos, orientation=self.init_ori)
+        self.world_prim.set_world_pose(
+            position=self.init_pos, orientation=self.init_ori
+        )
 
         if "cuda" in self._device:
             self.physics_sim_view = SimulationManager.get_physics_sim_view()
@@ -456,7 +460,7 @@ class GarmentObject(SingleClothPrim):
             ]
             logger.debug(f"[GarmentObject] Using global random module for reset")
 
-        self.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
+        self.world_prim.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
         self.reset_pose = np.concatenate(
             [np.array(pos, dtype=np.float32), np.array(ori, dtype=np.float32)]
         )
@@ -524,8 +528,8 @@ class GarmentObject(SingleClothPrim):
                     "pos_world and ori_world must be provided if device is cpu"
                 )
             self._prim.GetAttribute("points").Set(Vt.Vec3fArray.FromNumpy(mesh_points))
-            self.set_world_pose(pos_world, ori_world)
-            # self.world_prim.set_world_pose(pos_world, ori_world)
+            self.world_prim.set_world_pose(pos_world, ori_world)
+
         else:
             current_mesh_points = (
                 torch.from_numpy(mesh_points).to(self._device).unsqueeze(0)
@@ -673,7 +677,33 @@ class GarmentObject(SingleClothPrim):
                 self._get_points_pose().detach().cpu().numpy()
             )
         else:
-            self.initial_points_positions = self._cloth_prim_view.get_world_positions()
+            from .utils import transform_points, pose_to_matrix
+
+            # 1️⃣ 读取当前 world 粒子位置
+            world_pts = (
+                self._cloth_prim_view.get_world_positions()
+                .squeeze(0)
+                .detach()
+                .cpu()
+                .numpy()
+            )
+
+            # 2️⃣ 获取 world pose（torch, on GPU）
+            pos, quat = self.world_prim.get_world_pose()
+
+            # 3️⃣ 转成 CPU numpy
+            pos = pos.detach().cpu().numpy()
+            quat = quat.detach().cpu().numpy()
+
+            # 4️⃣ pose → 4x4 matrix
+            T = pose_to_matrix(pos, quat)
+            T_inv = np.linalg.inv(T)
+
+            # 5️⃣ 反算 local 粒子（CPU numpy）
+            local_np = transform_points(T_inv, world_pts)
+
+            # 6️⃣ ⬅️ 关键：立刻转回 torch tensor（回到 cloth 的 device）
+            self.initial_points_positions = torch.from_numpy(local_np).to(self._device)
 
     def transform_points(self, points, pos, ori, scale):
         """
@@ -723,6 +753,5 @@ class GarmentObject(SingleClothPrim):
                 )
             else:
                 self._cloth_prim_view.set_world_positions(self.initial_points_positions)
-            self.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
-            # self.world_prim.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
+            self.world_prim.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
             self.reset_pose = np.array(pose, dtype=np.float32)
