@@ -8,7 +8,7 @@ class ChallengeGarmentLoader:
 
     This class is responsible for loading garment configurations from the specified directory
     structure, supporting both Release and Holdout versions, as well as different types of
-    garments (long-sleeve tops, short-sleeve tops, long pants, short pants).
+    garments (long-sleeve top, short-sleeve top, long pants, short pants).
     """
 
     def __init__(self, base_path: str = "Assets/objects/Challenge_Garment"):
@@ -21,10 +21,10 @@ class ChallengeGarmentLoader:
         self.base_path = os.path.join(os.getcwd(), base_path)
         """Base path pointing to the Challenge_Garment directory"""
         self.garment_type_map: Dict[str, str] = {
-            "Top_Long": "Tops_Long",
-            "Top_Short": "Tops_Short",
-            "Pant_Short": "Trousers_Short",
-            "Pant_Long": "Trousers_Long",
+            "Top_Long": "Top_Long",
+            "Top_Short": "Top_Short",
+            "Pant_Short": "Pant_Short",
+            "Pant_Long": "Pant_Long",
         }
         """Garment type mapping dictionary that maps simplified type names to actual directory names"""
 
@@ -88,14 +88,14 @@ class ChallengeGarmentLoader:
         Returns:
             str: One of "top-long-sleeve", "top-short-sleeve", "short-pant", "long-pant"
         """
-        mapped_type = self._get_garment_type(garment_name)  # e.g., "Tops_Long" etc.
-        if mapped_type == "Tops_Long":
+        mapped_type = self._get_garment_type(garment_name)  # e.g., "Top_Long" etc.
+        if mapped_type == "Top_Long":
             return "top-long-sleeve"
-        elif mapped_type == "Tops_Short":
+        elif mapped_type == "Top_Short":
             return "top-short-sleeve"
-        elif mapped_type == "Trousers_Short":
+        elif mapped_type == "Pant_Short":
             return "short-pant"
-        elif mapped_type == "Trousers_Long":
+        elif mapped_type == "Pant_Long":
             return "long-pant"
         else:
             raise ValueError(
@@ -106,13 +106,13 @@ class ChallengeGarmentLoader:
         """Extract and map garment type from garment name.
 
         Parses the first two parts of the garment name (e.g., "Top_Long") and maps it to
-        the actual directory name (e.g., "Tops_Long").
+        the actual directory name (e.g., "Top_Long").
 
         Args:
             garment_name (str): Garment name in the format "Type_Length_Seen/Unseen_Index"
 
         Returns:
-            str: Mapped garment type directory name, e.g., "Tops_Long", "Trousers_Short", etc.
+            str: Mapped garment type directory name, e.g., "Top_Long", "Pant_Short", etc.
 
         Raises:
             ValueError: Raised when the garment name format is invalid or the type is unknown

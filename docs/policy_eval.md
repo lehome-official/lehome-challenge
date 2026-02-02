@@ -12,7 +12,7 @@ Evaluate trained LeRobot models (ACT, Diffusion Policy, SmolVLA):
 python -m scripts.eval \
     --policy_type lerobot \
     --policy_path outputs/train/act \
-    --garment_type "tops_long" \
+    --garment_type "top_long" \
     --dataset_root Datasets/example/top_long \
     --num_episodes 5 \
     --enable_cameras \
@@ -87,7 +87,7 @@ from .my_policy import MyPolicy
 python -m scripts.eval \
     --policy_type custom \
     --policy_path "path/to/your/model" \
-    --garment_type "tops_long" \
+    --garment_type "top_long" \
     --num_episodes 5 \
     --enable_cameras \
     --device cpu

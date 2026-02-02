@@ -297,13 +297,13 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
     else:
         # Map argument to specific sub-category directory
         type_map = {
-            "tops_long": "Tops_Long",
-            "tops_short": "Tops_Short",
-            "trousers_long": "Trousers_Long",
-            "trousers_short": "Trousers_Short",
+            "top_long": "Top_Long",
+            "top_short": "Top_Short",
+            "pant_long": "Pant_Long",
+            "pant_short": "Pant_Short",
         }
-        file_prefix = type_map.get(args.garment_type, "Tops_Long")
-        # Path: Assets/objects/Challenge_Garment/Release/Tops_Long/Tops_Long.txt
+        file_prefix = type_map.get(args.garment_type, "Top_Long")
+        # Path: Assets/objects/Challenge_Garment/Release/Top_Long/Top_Long.txt
         eval_list_path = os.path.join(
             args.garment_cfg_base_path, "Release", file_prefix, f"{file_prefix}.txt"
         )

@@ -121,7 +121,7 @@ Evaluate your trained policy on the challenge garments. The framework supports L
 python -m scripts.eval \
     --policy_type lerobot \
     --policy_path outputs/train/act_top_long/checkpoints/last/pretrained_model \
-    --garment_type "tops_long" \
+    --garment_type "top_long" \
     --dataset_root Datasets/example/top_long_merged \
     --num_episodes 2 \
     --enable_cameras \
@@ -131,7 +131,7 @@ python -m scripts.eval \
 # Note: Participants can define their own model loading logic within the policy class. Provides flexibility for participants to implement specialized loading and inference logic.
 python -m scripts.eval \
     --policy_type custom \
-    --garment_type "tops_long" \
+    --garment_type "top_long" \
     --num_episodes 5 \
     --enable_cameras \
     --device cpu
@@ -144,7 +144,7 @@ python -m scripts.eval \
 | `--policy_type` | Policy type: `lerobot`, `custom` | `lerobot` | All |
 | `--policy_path` | Path to model checkpoint | - | All (passed as `model_path` for custom) |
 | `--dataset_root` | Dataset path (for metadata) | - | **LeRobot only** |
-| `--garment_type` | Type of garments: `tops_long`, `tops_short`, `trousers_long`, `trousers_short`, `custom` | `tops_long` | All |
+| `--garment_type` | Type of garments: `top_long`, `top_short`, `pant_long`, `pant_short`, `custom` | `top_long` | All |
 | `--num_episodes` | Episodes per garment | `5` | All |
 | `--max_steps` | Max steps per episode | `600` | All |
 | `--save_video` | Save evaluation videos | | All |
@@ -159,9 +159,9 @@ python -m scripts.eval \
 
 
 #### Garment Test Configuration
-Evaluation is performed on the `Release` set of garments. Under the directory `Assets/objects/Challenge_Garment/Release`, each garment category folder contains a corresponding text file listing the garment names (e.g., `Tops_Long/Tops_Long.txt`).
+Evaluation is performed on the `Release` set of garments. Under the directory `Assets/objects/Challenge_Garment/Release`, each garment category folder contains a corresponding text file listing the garment names (e.g., `Top_Long/Top_Long.txt`).
 
-*   **Evaluate a Category**: Set `--garment_type` to `tops_long`, `tops_short`, `trousers_long`, or `trousers_short` to evaluate all garments within that category.
+*   **Evaluate a Category**: Set `--garment_type` to `top_long`, `top_short`, `pant_long`, or `pant_short` to evaluate all garments within that category.
 *   **Evaluate Specific Garments**: Edit `Assets/objects/Challenge_Garment/Release/Release_test_list.txt` to include only the garments you want to test, then run with `--garment_type custom`.
 
 > 📖 **For detailed policy evaluation guide**, see [eval_guide](docs/policy_eval.md).
