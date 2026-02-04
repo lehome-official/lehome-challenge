@@ -209,6 +209,7 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
     """
     # 1. Environment Configuration
     env_cfg = parse_env_cfg(args.task, device=args.device)
+    env_cfg.sim.use_fabric = False
     if args.use_random_seed:
         env_cfg.use_random_seed = True
     else:

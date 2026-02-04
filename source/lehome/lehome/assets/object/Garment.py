@@ -13,7 +13,7 @@ from isaacsim.core.api.materials.particle_material import ParticleMaterial
 from isaacsim.core.api.materials.preview_surface import PreviewSurface
 from isaacsim.core.utils.stage import add_reference_to_stage
 from isaacsim.core.utils.string import find_unique_string_name
-from isaacsim.core.utils.prims import is_prim_path_valid
+from isaacsim.core.utils.prims import is_prim_path_valid, set_prim_visibility
 from isaacsim.core.utils.rotations import euler_angles_to_quat, quat_to_rot_matrix
 from isaacsim.core.simulation_manager import SimulationManager
 from pxr import Vt
@@ -66,6 +66,7 @@ class GarmentObject(SingleClothPrim):
         logger.debug(f"usd prim path: {self.usd_prim_path}")
         # usd name
         self.prim_name = prim_path.split("/")[-1]
+        self.prim_parent_path = os.path.dirname(self.usd_prim_path)
         # mesh prim path which is contained in the usd asset
         self.mesh_prim_path = find_unique_string_name(
             self.usd_prim_path + "/mesh",
@@ -240,10 +241,12 @@ class GarmentObject(SingleClothPrim):
         else:
             logger.warning("[GarmentObject] No visual materials specified")
 
-        self.world_prim.set_world_pose(
-            position=self.init_pos, orientation=self.init_ori
-        )
+        self.set_world_pose(position=self.init_pos, orientation=self.init_ori)
         logger.debug("[GarmentObject] Garment object initialized successfully")
+
+        # refresh visibility
+        # set_single_prim_visible(self.mesh_prim_path, visible=False)
+        # set_single_prim_visible(self.mesh_prim_path, visible=True)
 
     def _validate_configs(
         self, particle_config: DictConfig, garment_config: DictConfig
@@ -358,9 +361,7 @@ class GarmentObject(SingleClothPrim):
         while also get initial info of particles that make up the object.
         """
         # set local pose for initialization (wait for the update of scene manager)
-        self.world_prim.set_world_pose(
-            position=self.init_pos, orientation=self.init_ori
-        )
+        self.set_world_pose(position=self.init_pos, orientation=self.init_ori)
 
         if "cuda" in self._device:
             self.physics_sim_view = SimulationManager.get_physics_sim_view()
@@ -378,7 +379,6 @@ class GarmentObject(SingleClothPrim):
         Meanwhile, return back to the initial positions of all particles that make up the object.
         """
         logger.debug("[GarmentObject] Performing soft reset")
-
         # Reset Points Positions
         if self._device == "cpu":
             self._prim.GetAttribute("points").Set(
@@ -460,11 +460,11 @@ class GarmentObject(SingleClothPrim):
             ]
             logger.debug(f"[GarmentObject] Using global random module for reset")
 
-        self.world_prim.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
+        self.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
         self.reset_pose = np.concatenate(
             [np.array(pos, dtype=np.float32), np.array(ori, dtype=np.float32)]
         )
-        logger.debug(f"[GarmentObject] Reset complete - pos: {pos}, ori: {ori}")
+        logger.info(f"[GarmentObject] Reset complete - pos: {pos}, ori: {ori}")
 
     def get_current_mesh_points(
         self, visualize=False, save=False, save_path="./pointcloud.ply"
@@ -513,29 +513,6 @@ class GarmentObject(SingleClothPrim):
             o3d.io.write_point_cloud(save_path, pcd)
             logger.debug(f"points saved to {save_path}")
         return transformed_mesh_points, mesh_points, pos_world, ori_world
-
-    def set_current_mesh_points(self, mesh_points, pos_world, ori_world):
-        """
-        Set the current mesh points of the deformable object.
-        Input:
-            mesh_points (ndarray): original mesh points, which is provided in 'get_current_mesh_points' function
-            pos_world (ndarray): world position of the mesh points, which is provided in 'get_current_mesh_points' function, only need for cpu version
-            ori_world (ndarray): world orientation of the mesh points, which is provided in 'get_current_mesh_points' function, only need for cpu version
-        """
-        if self._device == "cpu":
-            if pos_world is None or ori_world is None:
-                raise ValueError(
-                    "pos_world and ori_world must be provided if device is cpu"
-                )
-            self._prim.GetAttribute("points").Set(Vt.Vec3fArray.FromNumpy(mesh_points))
-            self.world_prim.set_world_pose(pos_world, ori_world)
-
-        else:
-            current_mesh_points = (
-                torch.from_numpy(mesh_points).to(self._device).unsqueeze(0)
-            )
-            self._cloth_prim_view.set_world_positions(current_mesh_points)
-        return
 
     def _apply_visual_material(self, material_paths: Sequence[str]):
         """
@@ -677,33 +654,7 @@ class GarmentObject(SingleClothPrim):
                 self._get_points_pose().detach().cpu().numpy()
             )
         else:
-            from .utils import transform_points, pose_to_matrix
-
-            # 1️⃣ 读取当前 world 粒子位置
-            world_pts = (
-                self._cloth_prim_view.get_world_positions()
-                .squeeze(0)
-                .detach()
-                .cpu()
-                .numpy()
-            )
-
-            # 2️⃣ 获取 world pose（torch, on GPU）
-            pos, quat = self.world_prim.get_world_pose()
-
-            # 3️⃣ 转成 CPU numpy
-            pos = pos.detach().cpu().numpy()
-            quat = quat.detach().cpu().numpy()
-
-            # 4️⃣ pose → 4x4 matrix
-            T = pose_to_matrix(pos, quat)
-            T_inv = np.linalg.inv(T)
-
-            # 5️⃣ 反算 local 粒子（CPU numpy）
-            local_np = transform_points(T_inv, world_pts)
-
-            # 6️⃣ ⬅️ 关键：立刻转回 torch tensor（回到 cloth 的 device）
-            self.initial_points_positions = torch.from_numpy(local_np).to(self._device)
+            self.initial_points_positions = self._cloth_prim_view.get_world_positions()
 
     def transform_points(self, points, pos, ori, scale):
         """
@@ -747,11 +698,18 @@ class GarmentObject(SingleClothPrim):
             pose = pose_dict["Garment"]
             pos = pose[:3]
             ori = pose[3:]
+            self.set_world_pose(
+                [0.0, 0.0, 0.0], euler_angles_to_quat([0.0, 0.0, 0.0], degrees=True)
+            )
             if self._device == "cpu":
                 self._prim.GetAttribute("points").Set(
                     Vt.Vec3fArray.FromNumpy(self.initial_points_positions)
                 )
             else:
                 self._cloth_prim_view.set_world_positions(self.initial_points_positions)
-            self.world_prim.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
+            self.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
             self.reset_pose = np.array(pose, dtype=np.float32)
+
+            logger.info(
+                f"[GarmentObject] set_all_pose Reset complete - pos: {pos}, ori: {ori}"
+            )

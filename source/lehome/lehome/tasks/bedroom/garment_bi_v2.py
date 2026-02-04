@@ -38,7 +38,7 @@ class GarmentEnv(DirectRLEnv):
         self.cfg = cfg
         self.action_scale = self.cfg.action_scale
         self.object = None  # Will be created in _setup_scene
-        
+
         # Cache for distance-based reward (to handle step_interval decorator)
         self._last_computed_reward = 0.0
 
@@ -114,7 +114,7 @@ class GarmentEnv(DirectRLEnv):
                 omni.kit.commands.execute("DeletePrims", paths=[prim_path])
                 if hasattr(self, "sim") and self.sim is not None:
                     for _ in range(5):
-                        self.sim.step(render=False)
+                        self.sim.step(render=True)
                 if is_prim_path_valid(prim_path):
                     logger.warning(
                         f"[GarmentEnv] WARNING: Prim path {prim_path} still exists after deletion attempt!"
@@ -272,12 +272,12 @@ class GarmentEnv(DirectRLEnv):
         top_camera_depth = self.top_camera.data.output["depth"].squeeze()
         left_camera_rgb = self.left_camera.data.output["rgb"]
         right_camera_rgb = self.right_camera.data.output["rgb"]
-        
+
         # Convert depth from meters to millimeters (uint16)
         # Range: 0-65535 mm (0-65.535 m), precision: 1 mm
         depth_np = top_camera_depth.cpu().detach().numpy().copy()
         depth_mm = np.clip(depth_np * 1000, 0, 65535).astype(np.uint16)
-        
+
         observations = {
             "action": action.cpu().detach().numpy(),
             "observation.state": joint_pos.cpu().detach().numpy(),
@@ -316,7 +316,7 @@ class GarmentEnv(DirectRLEnv):
         top_camera_depth_tensor = self.top_camera.data.output["depth"]
 
         depth_img = top_camera_depth_tensor[env_index].clone().cpu().numpy().squeeze()
-        
+
         # Converting to float32 and to meter
         depth_img = depth_img.astype(np.float32) / 1000.0
 
@@ -335,12 +335,12 @@ class GarmentEnv(DirectRLEnv):
 
     def _get_rewards(self) -> torch.Tensor:
         """Calculate distance-based reward for garment folding task.
-        
+
         Reward Components:
         1. Distance-based reward: Encourages getting closer to target distances
         2. Success bonus: Large reward when all conditions are met
         3. Progress reward: Partial credit for meeting some conditions
-        
+
         Returns:
             torch.Tensor: Reward value (0.0 to 1.0+)
         """
@@ -353,53 +353,53 @@ class GarmentEnv(DirectRLEnv):
         #     total_reward = 0
         # return total_reward
         # =====================================================
-        
+
         # ========== Distance-Based Reward (Dense) ==========
         # Check if object is valid
         if self.object is None:
             return 0.0
         if not hasattr(self.object, "_cloth_prim_view"):
             return 0.0
-        
+
         # Get detailed success check result
         garment_type = self.garment_loader.get_garment_type(self.cfg.garment_name)
         result = success_checker_garment_fold(self.object, garment_type)
-        
+
         # Handle step_interval decorator returning False
         if not isinstance(result, dict):
             # Return cached reward from last computation (maintains reward continuity)
             return self._last_computed_reward
-        
+
         # Extract details
         success = result.get("success", False)
         details = result.get("details", {})
-        
+
         # If success, return maximum reward
         if success:
             self._last_computed_reward = 1.0
             return 1.0
-        
+
         # Calculate distance-based reward
         total_reward = 0.0
         num_conditions = len(details)
-        
+
         if num_conditions == 0:
             return 0.0
-        
+
         # Calculate weighted reward based on condition type
         # Primary conditions (<=): folding-related, higher weight
         # Secondary conditions (>=): shape constraints, lower weight
         primary_rewards = []
         secondary_rewards = []
-        
+
         for cond_key, cond_info in details.items():
             value = cond_info.get("value", 0.0)
             threshold = cond_info.get("threshold", 0.0)
             passed = cond_info.get("passed", False)
-            
+
             description = cond_info.get("description", "")
             is_less_than = "<=" in description
-            
+
             if passed:
                 condition_reward = 1.0
             else:
@@ -419,39 +419,39 @@ class GarmentEnv(DirectRLEnv):
                         condition_reward = max(0.0, 1.0 - np.exp(-1.5 * (1.0 - ratio)))
                     else:
                         condition_reward = 0.0
-            
+
             if is_less_than:
                 primary_rewards.append(condition_reward)
             else:
                 secondary_rewards.append(condition_reward)
-        
+
         # Weighted combination: primary conditions dominate
         # Only give significant reward when primary conditions are mostly satisfied
         num_primary = len(primary_rewards)
         num_secondary = len(secondary_rewards)
-        
+
         if num_primary > 0:
             avg_primary = sum(primary_rewards) / num_primary
             # Use geometric mean to heavily penalize if any primary condition is bad
             min_primary = min(primary_rewards) if primary_rewards else 0.0
             # Combine average and minimum to ensure all primary conditions matter
-            primary_score = (avg_primary ** 0.7) * (min_primary ** 0.3)
+            primary_score = (avg_primary**0.7) * (min_primary**0.3)
         else:
             primary_score = 1.0
-        
+
         if num_secondary > 0:
             avg_secondary = sum(secondary_rewards) / num_secondary
             secondary_score = avg_secondary
         else:
             secondary_score = 1.0
-        
+
         # Final reward: primary conditions weighted heavily (80%), secondary (20%)
         # Scale to [0, 0.9] to reserve 1.0 for success
         final_reward = (0.8 * primary_score + 0.2 * secondary_score) * 0.9
-        
+
         # Cache the computed reward for non-check steps
         self._last_computed_reward = float(final_reward)
-        
+
         return float(final_reward)
         # ===================================================
 
@@ -518,7 +518,7 @@ class GarmentEnv(DirectRLEnv):
         if env_ids is None:
             env_ids = self.left_arm._ALL_INDICES
         super()._reset_idx(env_ids)
-        
+
         # Reset cached reward on episode reset
         self._last_computed_reward = 0.0
 
@@ -660,7 +660,7 @@ class GarmentEnv(DirectRLEnv):
         if hasattr(self, "sim") and self.sim is not None:
             for i in range(cleanup_steps):
                 try:
-                    self.sim.step(render=False)
+                    self.sim.step(render=True)
                     # Log progress every 5 steps
                     if (i + 1) % 5 == 0:
                         logger.debug(
@@ -684,7 +684,7 @@ class GarmentEnv(DirectRLEnv):
         if hasattr(self, "sim") and self.sim is not None:
             for i in range(initial_steps):
                 try:
-                    self.sim.step(render=False)
+                    self.sim.step(render=True)
                 except Exception as e:
                     logger.warning(f"[GarmentEnv] Error during initial step {i+1}: {e}")
             logger.debug(f"[GarmentEnv] Initial physics steps completed")
