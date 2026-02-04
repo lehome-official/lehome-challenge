@@ -151,6 +151,7 @@ python -m scripts.eval \
 | `--video_dir` | Directory to save evaluation videos | `outputs/eval_videos` | `--save_video` |
 | `--enable_cameras` | Enable camera rendering | | All |
 | `--device` | Device for inference: only `cpu` |'cpu'| All |
+| `--headless` | Used for evaluation without GUI | disabled | All |
 
 **Parameter Descriptions:**
 
