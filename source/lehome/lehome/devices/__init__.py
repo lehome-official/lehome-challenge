@@ -1,6 +1,9 @@
 from .device_base import DeviceBase
 from .lerobot import SO101Leader, BiSO101Leader
-from .keyboard import Se3Keyboard, BiKeyboard
+import os
+
+if os.environ.get("LEHOME_DISABLE_KEYBOARD") != "1":
+    from .keyboard import Se3Keyboard, BiKeyboard
 
 __all__ = [
     "DeviceBase",

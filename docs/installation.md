@@ -51,6 +51,26 @@ uv pip install -e ./source/lehome
 ```
 
 ---
+###
+If you are using a server, please download the system dependencies.
+
+```bash
+    #step 1
+    apt update
+    apt install -y \
+    libglu1-mesa \
+    libgl1 \
+    libegl1 \
+    libxrandr2 \
+    libxinerama1 \
+    libxcursor1 \
+    libxi6 \
+    libxext6 \
+    libx11-6
+    #step 2
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+```
+
 
 ## Next Steps
 

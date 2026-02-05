@@ -23,6 +23,10 @@ def main():
         import lehome.tasks.bedroom
         from .utils.evaluation import eval
 
+        if getattr(args, "headless", False):
+            import os
+
+            os.environ["LEHOME_DISABLE_KEYBOARD"] = "1"
         eval(args, simulation_app)
     except Exception as e:
         logger.error(f"Error during evaluation: {e}")
