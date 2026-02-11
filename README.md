@@ -165,6 +165,28 @@ Evaluation is performed on the `Release` set of garments. Under the directory `A
 *   **Evaluate a Category**: Set `--garment_type` to `top_long`, `top_short`, `pant_long`, or `pant_short` to evaluate all garments within that category.
 *   **Evaluate Specific Garments**: Edit `Assets/objects/Challenge_Garment/Release/Release_test_list.txt` to include only the garments you want to test, then run with `--garment_type custom`.
 
+#### Domain Randomization Configuration
+Domain randomization are provided to enhance robustness during evaluation. Two types of randomization are available:
+
+*   **Texture Randomization**: Applies random textures to the table surface, varying visual appearance across evaluation episodes.
+*   **Light Randomization**: Randomly varies lighting intensity and color, simulating different illumination conditions.
+
+To enable these randomization features during evaluation, modify the `particle_garment_cfg.yaml` configuration file:
+
+```yaml
+objects:
+  texture_randomization:
+    enable: True  # Set to True to enable table texture randomization
+    folder: "Assets/textures/surface"
+    min_id: 1
+    max_id: 100
+  
+  light_randomization:
+    enable: True  # Set to True to enable lighting condition randomization
+    prim_path: "/World/Light"
+    intensity_range: [3500, 5000]
+    color_range: [0.0, 0.2]
+```
 > 📖 **For detailed policy evaluation guide**, see [eval_guide](docs/policy_eval.md).
 
 
