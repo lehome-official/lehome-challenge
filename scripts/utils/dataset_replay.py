@@ -550,6 +550,7 @@ def replay(args: argparse.Namespace) -> None:
 
     logger.info(f"Creating environment: {args.task}")
     env_cfg = parse_env_cfg(args.task, device=device)
+    env_cfg.sim.use_fabric = False
 
     # Set garment configuration
     try:
