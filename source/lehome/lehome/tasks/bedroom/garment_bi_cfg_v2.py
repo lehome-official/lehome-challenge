@@ -26,7 +26,7 @@ class GarmentEnvCfg(DirectRLEnvCfg):
         dt=1 / 90,
         render_interval=decimation,
         render=render_cfg,
-        use_fabric=True,
+        use_fabric=False,
     )
     # garment_name (str): Garment name in the format "Type_Length_Seen/Unseen_Index",
     # e.g., "Top_Long_Unseen_0", "Top_Short_Seen_1",
