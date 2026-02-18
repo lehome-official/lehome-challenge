@@ -208,7 +208,15 @@ class GarmentEnv(DirectRLEnv):
         """
         if self.object is None:
             return
-
+        
+        # bug: stuck while eval
+        from isaacsim.core.api import World
+        world = World.instance()
+        # bug: stuck while eval
+        was_playing = world.is_playing()
+        if was_playing:
+            world.pause()
+            
         try:
             # Try to get prim_path from object first, then fallback to garment_name-based path
             if hasattr(self.object, "usd_prim_path") and self.object.usd_prim_path:
@@ -248,7 +256,9 @@ class GarmentEnv(DirectRLEnv):
             import traceback
 
             traceback.print_exc()
-
+        # bug: stuck while eval
+        if was_playing:
+            world.play()
         self.object = None
 
     def _pre_physics_step(self, actions: torch.Tensor) -> None:

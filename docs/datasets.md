@@ -267,7 +267,7 @@ Replay recorded datasets for visualization, verification, or data augmentation. 
 
 ```bash
 python -m scripts.dataset_sim replay \
-    --dataset_root Datasets/record/example/record_top_long_release_10/001 \
+    --dataset_root Datasets/example/pant_long_merged \
     --num_replays 1 \
     --disable_depth \
     --device "cpu" \
