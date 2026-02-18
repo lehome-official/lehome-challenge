@@ -396,7 +396,7 @@ def setup_eval_parser() -> argparse.ArgumentParser:
         "--garment_type",
         type=str,
         default="top_long",
-        choices=["top_long", "tops_short", "pant_long", "pant_short", "custom"],
+        choices=["top_long", "top_short", "pant_long", "pant_short", "custom"],
         help="Type of garments to evaluate.",
     )
     parser.add_argument(
