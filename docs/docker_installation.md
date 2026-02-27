@@ -34,19 +34,34 @@ wget https://huggingface.co/datasets/lehome/docker/resolve/main/lehome-challenge
 docker load -i lehome-challenge.tar.gz
 ```
 
-### 4. Run and Test the Environment
+### 4. Run and Activate the Environment
 
 ```bash
 # Start the container (adjust flags as needed)
 docker run -it lehome-challenge
-
 # Inside the container, activate the environment and verify
 cd /opt/lehome-challenge
 source .venv/bin/activate
-./third_party/IsaacLab/isaaclab.sh -i none
 ```
 
-## Next Steps
+### 5. Eval
+
+```bash
+python -m scripts.eval \
+    --policy_type lerobot \
+    --policy_path outputs/train/act_top_long/checkpoints/last/pretrained_model \
+    --garment_type "top_long" \
+    --dataset_root Datasets/example/top_long_merged \
+    --num_episodes 2 \
+    --enable_cameras \
+    --device cpu \
+    --headless
+```
+
+> **Note:** Make sure you enable headless mode.
+
+
+## More Details
 
 Now that you have installed the environment, you can:
 
