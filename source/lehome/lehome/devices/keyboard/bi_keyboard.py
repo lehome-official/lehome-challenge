@@ -36,6 +36,18 @@ class BiKeyboard(Device):
         Joint 5 (wrist_roll)           9                 0
         Joint 6 (gripper)              [ (or Numpad+)    ] (or Numpad-)
         ============================== ================= =================
+
+        Right Arm (laptop fallback keys):
+        ============================== ================= =================
+        Description                    Key (+ve axis)    Key (-ve axis)
+        ============================== ================= =================
+        Joint 1 (shoulder_pan)         Z                 X
+        Joint 2 (shoulder_lift)        C                 V
+        Joint 3 (elbow_flex)           M                 ,
+        Joint 4 (wrist_flex)           .                 /
+        Joint 5 (wrist_roll)           R                 F
+        Joint 6 (gripper)              W                 E
+        ============================== ================= =================
     """
 
     def __init__(self, env, sensitivity: float = 0.05):
@@ -69,6 +81,7 @@ class BiKeyboard(Device):
         self._additional_callbacks = {}
 
         self.listener = Listener(on_press=self.on_press, on_release=self.on_release)
+        self.listener.daemon = True
         self.listener.start()
 
     def __del__(self):
@@ -96,11 +109,15 @@ class BiKeyboard(Device):
         msg += "\t  Joint 4 (wrist_flex):    7/8\n"
         msg += "\t  Joint 5 (wrist_roll):    9/0\n"
         msg += "\t  Joint 6 (gripper):       [/] (or Numpad +/-)\n"
+        msg += "\t  Laptop fallback set:\n"
+        msg += "\t    J1: Z/X, J2: C/V, J3: M/COMMA, J4: PERIOD/SLASH\n"
+        msg += "\t    J5: R/F, J6: W/E\n"
         msg += "\t----------------------------------------------\n"
         msg += "\tStart Control: B\n"
         msg += "\tStart Recording: S\n"
         msg += "\tDiscard Episode: D\n"
         msg += "\tTask Success and Save: N\n"
+        msg += "\tQuick Reset: R\n"
         msg += "\tAbort Recording: ESC\n"
         msg += "\tControl+C: quit"
         return msg
@@ -131,6 +148,9 @@ class BiKeyboard(Device):
                 # This allows continuous recording of multiple episodes without reactivating control
                 if "N" in self._additional_callbacks:
                     self._additional_callbacks["N"]()
+            elif key.char == "r":
+                if "R" in self._additional_callbacks:
+                    self._additional_callbacks["R"]()
         except AttributeError:
             # Handle special keys (like ESC)
             if key == Key.esc and "ESCAPE" in self._additional_callbacks:
@@ -176,6 +196,7 @@ class BiKeyboard(Device):
                 key_name = event.input.name
         except AttributeError:
             return True
+        key_name = self._normalize_key_name(key_name)
 
         # Apply the command when pressed
         if event.type == carb.input.KeyboardEventType.KEY_PRESS:
@@ -183,13 +204,58 @@ class BiKeyboard(Device):
                 self._left_delta_pos += self._LEFT_KEY_MAPPING[key_name]
             elif key_name in self._RIGHT_KEY_MAPPING.keys():
                 self._right_delta_pos += self._RIGHT_KEY_MAPPING[key_name]
-        # Remove the command when un-pressed
+        # Remove the command when un-pressed; also handle control keys here so
+        # they work on XWayland where pynput global key-grabs are blocked.
         elif event.type == carb.input.KeyboardEventType.KEY_RELEASE:
-            if key_name in self._LEFT_KEY_MAPPING.keys():
+            if key_name == "B":
+                if not self.started:
+                    self.started = True
+                    self._reset_state = False
+                    print("[BiKeyboard] Control started!")
+            elif key_name == "S" and "S" in self._additional_callbacks:
+                self._additional_callbacks["S"]()
+            elif key_name == "N" and "N" in self._additional_callbacks:
+                self._additional_callbacks["N"]()
+            elif key_name == "D" and "D" in self._additional_callbacks:
+                self._additional_callbacks["D"]()
+            elif key_name == "R" and "R" in self._additional_callbacks:
+                self._additional_callbacks["R"]()
+            elif key_name == "ESCAPE" and "ESCAPE" in self._additional_callbacks:
+                self._additional_callbacks["ESCAPE"]()
+            elif key_name in self._LEFT_KEY_MAPPING.keys():
                 self._left_delta_pos -= self._LEFT_KEY_MAPPING[key_name]
             elif key_name in self._RIGHT_KEY_MAPPING.keys():
                 self._right_delta_pos -= self._RIGHT_KEY_MAPPING[key_name]
         return True
+
+    @staticmethod
+    def _normalize_key_name(key_name: str) -> str:
+        """Normalize key names from different backends/layouts to a common form."""
+        if not isinstance(key_name, str):
+            return key_name
+        name = key_name.upper()
+        if name.startswith("KEY_"):
+            # KEY_T -> T, KEY_1 -> 1
+            name = name[4:]
+        return {
+            "ESC": "ESCAPE",
+            "BRACKETLEFT": "LEFT_BRACKET",
+            "BRACKETRIGHT": "RIGHT_BRACKET",
+            "LBRACKET": "LEFT_BRACKET",
+            "RBRACKET": "RIGHT_BRACKET",
+            "NUMPAD_PLUS": "NUMPAD_ADD",
+            "NUMPAD_MINUS": "NUMPAD_SUBTRACT",
+            "KP_ADD": "NUMPAD_ADD",
+            "KP_SUBTRACT": "NUMPAD_SUBTRACT",
+            "ADD": "NUMPAD_ADD",
+            "SUBTRACT": "NUMPAD_SUBTRACT",
+            "+": "NUMPAD_ADD",
+            "-": "NUMPAD_SUBTRACT",
+            "COMMA": "COMMA",
+            "PERIOD": "PERIOD",
+            "DOT": "PERIOD",
+            "SLASH": "SLASH",
+        }.get(name, name)
 
     def _create_key_bindings(self):
         """Creates key bindings for left and right arms."""
@@ -212,28 +278,38 @@ class BiKeyboard(Device):
         # Right arm (number keys) - Supports both main keyboard and numpad
         self._RIGHT_KEY_MAPPING = {
             # Joint 1 (shoulder_pan): 1(+) / 2(-)
+            "1": np.asarray([1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_1": np.asarray([1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_1": np.asarray([1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "2": np.asarray([-1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_2": np.asarray([-1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_2": np.asarray([-1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             # Joint 2 (shoulder_lift): 3(+) / 4(-)
+            "3": np.asarray([0.0, 1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_3": np.asarray([0.0, 1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_3": np.asarray([0.0, 1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "4": np.asarray([0.0, -1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_4": np.asarray([0.0, -1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_4": np.asarray([0.0, -1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             # Joint 3 (elbow_flex): 5(+) / 6(-)
+            "5": np.asarray([0.0, 0.0, 1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_5": np.asarray([0.0, 0.0, 1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_5": np.asarray([0.0, 0.0, 1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "6": np.asarray([0.0, 0.0, -1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_6": np.asarray([0.0, 0.0, -1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_6": np.asarray([0.0, 0.0, -1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
             # Joint 4 (wrist_flex): 7(+) / 8(-)
+            "7": np.asarray([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_7": np.asarray([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_7": np.asarray([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]) * self.sensitivity,
+            "8": np.asarray([0.0, 0.0, 0.0, -1.0, 0.0, 0.0]) * self.sensitivity,
             "KEY_8": np.asarray([0.0, 0.0, 0.0, -1.0, 0.0, 0.0]) * self.sensitivity,
             "NUMPAD_8": np.asarray([0.0, 0.0, 0.0, -1.0, 0.0, 0.0]) * self.sensitivity,
             # Joint 5 (wrist_roll): 9(+) / 0(-)
+            "9": np.asarray([0.0, 0.0, 0.0, 0.0, 1.0, 0.0]) * self.sensitivity,
             "KEY_9": np.asarray([0.0, 0.0, 0.0, 0.0, 1.0, 0.0]) * self.sensitivity,
             "NUMPAD_9": np.asarray([0.0, 0.0, 0.0, 0.0, 1.0, 0.0]) * self.sensitivity,
+            "0": np.asarray([0.0, 0.0, 0.0, 0.0, -1.0, 0.0]) * self.sensitivity,
             "KEY_0": np.asarray([0.0, 0.0, 0.0, 0.0, -1.0, 0.0]) * self.sensitivity,
             "NUMPAD_0": np.asarray([0.0, 0.0, 0.0, 0.0, -1.0, 0.0]) * self.sensitivity,
             # Joint 6 (gripper): [ (+) / ] (-)
@@ -241,4 +317,17 @@ class BiKeyboard(Device):
             "NUMPAD_ADD": np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, 1.0]) * self.sensitivity,  # Numpad +
             "RIGHT_BRACKET": np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, -1.0]) * self.sensitivity,  # ] key
             "NUMPAD_SUBTRACT": np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, -1.0]) * self.sensitivity,  # Numpad -
+            # Laptop fallback controls (no numpad required)
+            "Z": np.asarray([1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "X": np.asarray([-1.0, 0.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "C": np.asarray([0.0, 1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "V": np.asarray([0.0, -1.0, 0.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "M": np.asarray([0.0, 0.0, 1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "COMMA": np.asarray([0.0, 0.0, -1.0, 0.0, 0.0, 0.0]) * self.sensitivity,
+            "PERIOD": np.asarray([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]) * self.sensitivity,
+            "SLASH": np.asarray([0.0, 0.0, 0.0, -1.0, 0.0, 0.0]) * self.sensitivity,
+            "R": np.asarray([0.0, 0.0, 0.0, 0.0, 1.0, 0.0]) * self.sensitivity,
+            "F": np.asarray([0.0, 0.0, 0.0, 0.0, -1.0, 0.0]) * self.sensitivity,
+            "W": np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, 1.0]) * self.sensitivity,
+            "E": np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, -1.0]) * self.sensitivity,
         }

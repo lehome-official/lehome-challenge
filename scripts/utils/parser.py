@@ -21,7 +21,7 @@ def setup_record_parser(
         "--teleop_device",
         type=str,
         default="keyboard",
-        choices=["keyboard", "bi-keyboard", "so101leader", "bi-so101leader"],
+        choices=["keyboard", "bi-keyboard", "so101leader", "bi-so101leader", "bi-gamepad", "bi-vision"],
         help="Device for interacting with environment",
     )
     parser.add_argument(

@@ -4,7 +4,7 @@ import math
 
 def dynamic_reset_gripper_effort_limit_sim(env, teleop_device):
     need_to_set = []
-    if teleop_device in ["bi-so101leader", "bi-keyboard"]:
+    if teleop_device in ["bi-so101leader", "bi-keyboard", "bi-gamepad", "bi-vision"]:
         need_to_set = [
             env.scene.articulations["left_arm"],
             env.scene.articulations["right_arm"],
