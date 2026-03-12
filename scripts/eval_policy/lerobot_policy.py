@@ -188,7 +188,7 @@ class LeRobotPolicy(BasePolicy):
                 value_tensor = torch.from_numpy(value).float()
                 if value.ndim == 3 and value.shape[-1] == 3:  # Image: (H, W, C)
                     # (H, W, C) -> (C, H, W), [0, 1] normalization
-                    value_tensor = value_tensor.permute(2, 0, 1) / 255.0
+                    value_tensor = value_tensor.permute(2, 0, 1).to(self.device) / 255.0
                     obs_for_preproc[key] = value_tensor.unsqueeze(0)  # Add batch dim
                 else:
                     obs_for_preproc[key] = value_tensor.unsqueeze(0)  # Add batch dim

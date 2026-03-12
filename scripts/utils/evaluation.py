@@ -48,19 +48,52 @@ def run_evaluation_loop(
     json_path = None
     episode_index = 0
     if args.save_datasets:
-        # Note: We might need to handle 'features' argument if dataset saving is strictly required,
-        # but for simplicity in Challenge mode, we often skip strictly matching metadata features.
-        # Or you can expose policy.meta if available.
-        # Here we initialize vaguely to keep it simple.
+        features = None
+        if args.dataset_root and Path(args.dataset_root).exists():
+            source_dataset = LeRobotDataset(repo_id="collected_dataset", root=Path(args.dataset_root))
+            features = dict(source_dataset.meta.features)
+            fps = source_dataset.fps
+        else:
+            fps = 30  # Default FPS if no source dataset is provided
+            action_names = [
+                "shoulder_pan", "shoulder_lift", "elbow_flex",
+                "wrist_flex", "wrist_roll", "gripper",
+            ]
+            if is_bimanual:
+                left_names = [f"left_{n}" for n in action_names]
+                right_names = [f"right_{n}" for n in action_names]
+                joint_names = left_names + right_names
+            else:
+                joint_names = action_names
+            dim = len(joint_names)
+            features = {
+                "observation.state": {
+                    "dtype": "float32",
+                    "shape": (dim,),
+                    "names": joint_names,
+                },
+                "action": {
+                    "dtype": "float32",
+                    "shape": (dim,),
+                    "names": joint_names,
+                },
+            }
+            image_keys = ["top_rgb", "left_rgb", "right_rgb"] if is_bimanual else ["top_rgb", "wrist_rgb"]
+            for key in image_keys:
+                features[f"observation.images.{key}"] = {
+                    "dtype": "video",
+                    "shape": (480, 640, 3),
+                    "names": ["height", "width", "channels"],
+                }
         root_path = Path(args.eval_dataset_path)
         eval_dataset = LeRobotDataset.create(
             repo_id="lehome_eval",
-            fps=args.step_hz,
+            fps=fps,
             root=get_next_experiment_path_with_gap(root_path),
             use_videos=True,
             image_writer_threads=8,
             image_writer_processes=0,
-            features=None,  # Let LeRobot infer or pass explicitly if needed
+            features=features,
         )
         json_path = eval_dataset.root / "meta" / "garment_info.json"
 
