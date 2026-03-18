@@ -6,6 +6,11 @@ policy:
   type: diffusion
   device: cuda
   push_to_hub: false
+
+  # Avoid or increase the crop size, as the small default crop dimensions 
+  # may restrict the field of view and lead to task failure.
+  crop_shape: null
+  crop_is_random: false
   
   input_features:
     observation.state:
