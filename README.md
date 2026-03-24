@@ -170,9 +170,14 @@ Evaluation is performed on the `Release` set of garments. Under the directory `A
 
 ## 📮 Submission
 
-Once you are satisfied with your model's performance, follow these steps to submit your results to the competition leaderboard:
+Once you are satisfied with your model's performance, submit your results through this [google form](https://docs.google.com/forms/d/e/1FAIpQLSeeFpV4oYxSizNCnplX1Ew--TBafIbVyFg9NPH-hunks2rc7Q/viewform). In summary, the submitted files include: 
 
->Submission instructions will be available on the [competition website](https://lehome-challenge.com/).
+- A **README (.md) file** that provides detailed instructions on how we can evaluate your policy.
+- A **docker image URL** or **huggingface repo link** that contains your checkpoints, source code and any other dependencies required for evaluation.
+- All the json files, one for each rollout you performed (up to 500).
+- Source Code File(Optional, but highly encouraged). You can provide a link to your source code repository. This will NOT be used for evaluation, but it allows us to debug things easier if anything goes wrong during evaluation.
+
+>Please check the google form for more detailed submission information.
 
 ## 🧩 Acknowledgments
 
