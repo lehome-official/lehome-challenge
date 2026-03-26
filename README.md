@@ -21,7 +21,8 @@
 
 </div>
 
-> ⚠️ **Important Reminder**
+## ⚠️ **Important Reminder**
+
 > During evaluation, garments from different categories will be loaded randomly.
 > Participants cannot access the ground-truth garment category labels in the simulator during evaluation.
 > Therefore, if your policy requires garment labels, you must design your own method to obtain them (e.g., train a classifier).
@@ -29,6 +30,7 @@
 
 ## 📑 Table of Contents
 
+- [⚠️ **Important Reminder**](#️-important-reminder)
 - [📑 Table of Contents](#-table-of-contents)
 - [🚀 Quick Start](#-quick-start)
   - [1. Installation](#1-installation)
