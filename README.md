@@ -182,7 +182,7 @@ Once you are satisfied with your model's performance, submit your results throug
 
 - A **README (.md) file** that provides detailed instructions on how we can evaluate your policy.
 - A **docker image URL** or **huggingface repo link** that contains your checkpoints, source code and any other dependencies required for evaluation.
-- All the json files, one for each rollout you performed (up to 500).
+- The .txt file which contains rollout results you performed. 
 - Source Code File(Optional, but highly encouraged). You can provide a link to your source code repository. This will NOT be used for evaluation, but it allows us to debug things easier if anything goes wrong during evaluation.
 
 >Please check the google form for more detailed submission information.
