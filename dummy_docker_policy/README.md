@@ -1,6 +1,10 @@
 # Docker Policy Server
 
-By using this type policy you can completely isolate the policy from the simulator - they run as two separate processes communicating over HTTP.
+This policy type completely isolates your policy from the simulator — they run as two separate processes communicating over HTTP.
+
+Your policy runs inside a Docker container and only receives observations (images + joint states). It has no access to the simulation internals, reward functions, or success criteria. This makes submissions reproducible and easy to validate: organizers just run your container and evaluate it with the official code.
+
+You don't need the lehome-challenge repo inside your container at all — just your model and a lightweight HTTP server.
 
 ## Quick Start
 
