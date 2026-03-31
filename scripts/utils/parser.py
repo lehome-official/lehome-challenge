@@ -477,4 +477,12 @@ def setup_eval_parser() -> argparse.ArgumentParser:
         help="URDF path for IK solver (required when --use_ee_pose is set).",
     )
 
+    # Docker policy arguments
+    parser.add_argument(
+        "--docker_url",
+        type=str,
+        default="http://localhost:8080",
+        help="URL of the Docker policy server (used when --policy_type docker).",
+    )
+
     return parser
