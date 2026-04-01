@@ -23,6 +23,7 @@ class MyPolicy(BasePolicyServer):
         top   = observation["observation.images.top_rgb"]    # (H, W, 3) uint8
         left  = observation["observation.images.left_rgb"]   # (H, W, 3) uint8
         right = observation["observation.images.right_rgb"]  # (H, W, 3) uint8
+        depth = observation["observation.top_depth"]         # (H, W) uint16, depth in mm
         prev  = observation["action"]                        # (12,) float32, previous action
 
         action = self.model.predict(state, top, left, right)
@@ -66,6 +67,7 @@ Called when the policy needs new actions.
   - `observation.images.top_rgb` — `{"base64": "...", "shape": [H, W, 3], "dtype": "uint8"}`
   - `observation.images.left_rgb` — same format
   - `observation.images.right_rgb` — same format
+  - `observation.top_depth` — `{"base64": "...", "shape": [H, W], "dtype": "uint16"}` (depth in mm)
   - `action` — 12 floats (previous action)
 - Response: `{"actions": [[12 floats], ...]}`
 

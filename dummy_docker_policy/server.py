@@ -27,6 +27,7 @@ class BasePolicyServer:
         "observation.images.top_rgb"  — np.ndarray, shape (H, W, 3), uint8
         "observation.images.left_rgb" — np.ndarray, shape (H, W, 3), uint8
         "observation.images.right_rgb"— np.ndarray, shape (H, W, 3), uint8
+        "observation.top_depth"       — np.ndarray, shape (H, W), uint16 (depth in mm)
         "action"                      — np.ndarray, shape (12,), float32 (previous action)
     """
 

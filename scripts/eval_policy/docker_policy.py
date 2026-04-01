@@ -89,8 +89,8 @@ class DockerPolicy(BasePolicy):
         for key, value in observation.items():
             if not isinstance(value, np.ndarray):
                 continue
-            if "images" in key:
-                # Encode image as base64
+            if "images" in key or "depth" in key:
+                # Images and depth: encode as base64 (much smaller than JSON lists)
                 payload[key] = {
                     "base64": base64.b64encode(value.tobytes()).decode("ascii"),
                     "shape": list(value.shape),
