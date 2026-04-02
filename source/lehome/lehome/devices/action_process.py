@@ -74,7 +74,7 @@ def init_action_cfg(action_cfg, device):
             joint_names=["gripper"],
             scale=1.0,
         )
-    elif device in ["bi-keyboard"]:
+    elif device in ["bi-keyboard", "bi-gamepad", "bi-vision"]:
         action_cfg.left_arm_action = mdp.RelativeJointPositionActionCfg(
             asset_name="left_arm",
             joint_names=[
