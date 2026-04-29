@@ -195,3 +195,14 @@ This project stands on the shoulders of giants. We utilize and build upon the fo
 - **[Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html)** - For modular robot learning environments
 - **[LeRobot](https://github.com/huggingface/lerobot)** - For state-of-the-art Imitation Learning algorithms
 - **[Marble](https://marble.worldlabs.ai/)** - For diverse simulation scene generation
+
+## 📚 Citation
+
+If you use LeHome in your research, please consider citing:
+
+```bibtex
+@inproceedings{li2025lehome,
+  title={LeHome: A Simulation Environment for Deformable Object Manipulation in Household Scenarios},
+  author={Li, Zeyi and Yang, Jade and Xu, Jingkai and Xie, Shangbin and Chen, Tianxing and Wang, Yuran and Shen, Zhenhao and Shen, Yan and Zheng, Yukun and Li, Wenjun and others},
+  booktitle={IROS 2025-5th Workshop on RObotic MAnipulation of Deformable Objects: holistic approaches and challenges forward}
+}
