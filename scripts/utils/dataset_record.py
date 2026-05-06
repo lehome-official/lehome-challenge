@@ -48,7 +48,9 @@ def validate_task_and_device(args: argparse.Namespace) -> None:
         assert (
             args.teleop_device == "bi-so101leader"
             or args.teleop_device == "bi-keyboard"
-        ), "Only support bi-so101leader or bi-keyboard for bi-arm task"
+            or args.teleop_device == "bi-gamepad"
+            or args.teleop_device == "bi-vision"
+        ), "Only support bi-so101leader, bi-keyboard, bi-gamepad, or bi-vision for bi-arm task"
     else:
         assert (
             args.teleop_device == "so101leader" or args.teleop_device == "keyboard"
@@ -83,9 +85,15 @@ def create_teleop_interface(
         )
     if args.teleop_device == "bi-keyboard":
         return BiKeyboard(env, sensitivity=0.25 * args.sensitivity)
+    if args.teleop_device == "bi-gamepad":
+        from lehome.devices import BiGamepad
+        return BiGamepad(env, sensitivity=0.25 * args.sensitivity)
+    if args.teleop_device == "bi-vision":
+        from lehome.devices import BiVision
+        return BiVision(env, sensitivity=0.25 * args.sensitivity)
     raise ValueError(
         f"Invalid device interface '{args.teleop_device}'. "
-        f"Supported: 'keyboard', 'so101leader', 'bi-so101leader', 'bi-keyboard'."
+        f"Supported: 'keyboard', 'so101leader', 'bi-so101leader', 'bi-keyboard', 'bi-gamepad', 'bi-vision'."
     )
 
 
@@ -113,6 +121,7 @@ def register_teleop_callbacks(
         "success": False,  # N: Success/early termination of current episode
         "remove": False,  # D: Discard current episode
         "abort": False,  # ESC: Abort entire recording process, clear buffer
+        "reset": False,  # R: Quick reset environment/object pose
     }
 
     def on_start():
@@ -139,10 +148,15 @@ def register_teleop_callbacks(
         flags["abort"] = True
         logger.warning("[ESC] Abort recording, clearing the current episode buffer...")
 
+    def on_reset():
+        flags["reset"] = True
+        logger.info("[R] Quick reset requested.")
+
     teleop_interface.add_callback("S", on_start)
     teleop_interface.add_callback("N", on_success)
     teleop_interface.add_callback("D", on_remove)
     teleop_interface.add_callback("ESCAPE", on_abort)
+    teleop_interface.add_callback("R", on_reset)
 
     return flags
 
@@ -310,6 +324,7 @@ def run_idle_phase(
     teleop_interface: Any,
     args: argparse.Namespace,
     count_render: int,
+    flags: Dict[str, bool],
 ) -> Tuple[Optional[Dict[str, Any]], int]:
     """Run idle phase before recording starts.
 
@@ -329,6 +344,13 @@ def run_idle_phase(
 
     actions = teleop_interface.advance()
     object_initial_pose = None
+
+    if flags.get("reset", False):
+        logger.info("[Idle Phase] Applying quick reset...")
+        env.reset()
+        stabilize_garment_after_reset(env, args)
+        object_initial_pose = env.get_all_pose()
+        flags["reset"] = False
 
     if count_render == 0:
         logger.info("[Idle Phase] Initializing observations...")
@@ -424,6 +446,25 @@ def run_recording_phase(
                 dataset.finalize()
                 logger.warning(f"Recording aborted, completed {episode_index} episodes")
                 return object_initial_pose
+
+            if flags.get("reset", False):
+                logger.info(
+                    "[Recording] Quick reset requested; clearing current episode buffer..."
+                )
+                dataset.clear_episode_buffer()
+                try:
+                    env.reset()
+                    stabilize_garment_after_reset(env, args)
+                    object_initial_pose = env.get_all_pose()
+                except Exception as e:
+                    logger.error(
+                        f"[Recording] Failed to reset environment during quick reset: {e}"
+                    )
+                    traceback.print_exc()
+                flags["reset"] = False
+                flags["success"] = False
+                flags["remove"] = False
+                continue
 
             try:
                 dynamic_reset_gripper_effort_limit_sim(env, args.teleop_device)
@@ -583,6 +624,7 @@ def run_live_control_without_record(
     env: DirectRLEnv,
     teleop_interface: Any,
     args: argparse.Namespace,
+    flags: Dict[str, bool],
 ) -> None:
     """Run live teleoperation control without recording.
 
@@ -596,6 +638,13 @@ def run_live_control_without_record(
     """
     dynamic_reset_gripper_effort_limit_sim(env, args.teleop_device)
     actions = teleop_interface.advance()
+
+    if flags.get("reset", False):
+        logger.info("[Live Control] Applying quick reset...")
+        env.reset()
+        stabilize_garment_after_reset(env, args)
+        flags["reset"] = False
+        return
 
     if actions is None:
         current_obs = env._get_observations()
@@ -668,6 +717,7 @@ def record_dataset(args: argparse.Namespace, simulation_app: SimulationApp) -> N
                         teleop_interface,
                         args,
                         count_render,
+                        flags,
                     )
                     if pose is not None:
                         object_initial_pose = pose
@@ -695,7 +745,7 @@ def record_dataset(args: argparse.Namespace, simulation_app: SimulationApp) -> N
                     )
                     break
                 else:
-                    run_live_control_without_record(env, teleop_interface, args)
+                    run_live_control_without_record(env, teleop_interface, args, flags)
     except KeyboardInterrupt:
         logger.warning("\n[Ctrl+C] Interrupt signal detected")
         # If Ctrl+C is pressed during recording, clear the current buffer
