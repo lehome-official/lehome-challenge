@@ -233,6 +233,12 @@ def run_evaluation_loop(
             f"Episode {i + 1}/{args.num_episodes}: Return={episode_return:.2f}, Length={episode_length}, Success={is_success}"
         )
 
+    if args.save_datasets:
+        logger.info(
+            f"Finalizing eval dataset - contains {episode_index} episodes."
+        )
+        eval_dataset.finalize()
+
     return all_episode_metrics
 
 
@@ -267,7 +273,10 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
             f"Available policies: {', '.join(available_policies)}"
         )
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = args.device
+    if not device:
+        device = "cpu"
+    # FIXME something is pinning the device to GPU device = "cuda" if torch.cuda.is_available() else "cpu"
     is_bimanual = "Bi" in args.task or "bi" in args.task.lower()
 
     # Create policy instance from registry with appropriate arguments
@@ -292,6 +301,18 @@ def eval(args: argparse.Namespace, simulation_app: Any) -> None:
     elif args.policy_type == "docker":
         # Docker policy connects to an external container
         policy_kwargs["docker_url"] = args.docker_url
+    elif args.policy_type == "openpi_ws":
+        # OpenPI websocket policy connects to an openpi_client-compatible server
+        policy_kwargs.update(
+            {
+                "host": args.websocket_host,
+                "port": args.websocket_port,
+                "api_key": args.websocket_api_key,
+                "n_obs_steps": args.websocket_n_obs_steps,
+            }
+        )
+        if args.policy_path:
+            policy_kwargs["model_path"] = args.policy_path
     else:
         # For custom policies, pass policy_path as model_path if provided
         if args.policy_path:
