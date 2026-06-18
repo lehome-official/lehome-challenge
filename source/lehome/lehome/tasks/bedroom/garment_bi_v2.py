@@ -6,6 +6,7 @@ import os
 import random
 import numpy as np
 import torch
+import warp as wp
 from omegaconf import OmegaConf
 
 import isaaclab.sim as sim_utils
@@ -31,6 +32,12 @@ from lehome.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+def _to_torch(value):
+    if isinstance(value, torch.Tensor):
+        return value
+    return wp.to_torch(value)
+
+
 class GarmentEnv(DirectRLEnv):
     cfg: GarmentEnvCfg
 
@@ -47,6 +54,7 @@ class GarmentEnv(DirectRLEnv):
             cfg.garment_name, cfg.garment_version
         )
         self.particle_config = OmegaConf.load(cfg.particle_cfg_path)
+        self._obs_initialized = False
 
         if cfg.use_random_seed:
             # Use random seed (no fixed seed)
@@ -60,8 +68,6 @@ class GarmentEnv(DirectRLEnv):
             lookat=(0, 6.4, -2.8),
         )
         super().__init__(cfg, render_mode, **kwargs)
-        self.left_joint_pos = self.left_arm.data.joint_pos
-        self.right_joint_pos = self.right_arm.data.joint_pos
 
     def _setup_scene(self):
         self.left_arm = Articulation(self.cfg.left_robot)
@@ -270,11 +276,13 @@ class GarmentEnv(DirectRLEnv):
 
     def _get_observations(self) -> dict:
         action = self.actions.squeeze(0)
+        left_arm_joint_pos = _to_torch(self.left_arm.data.joint_pos)
+        right_arm_joint_pos = _to_torch(self.right_arm.data.joint_pos)
         left_joint_pos = torch.cat(
-            [self.left_joint_pos[:, i].unsqueeze(1) for i in range(6)], dim=-1
+            [left_arm_joint_pos[:, i].unsqueeze(1) for i in range(6)], dim=-1
         )
         right_joint_pos = torch.cat(
-            [self.right_joint_pos[:, i].unsqueeze(1) for i in range(6)], dim=-1
+            [right_arm_joint_pos[:, i].unsqueeze(1) for i in range(6)], dim=-1
         )
         joint_pos = torch.cat([left_joint_pos, right_joint_pos], dim=1)
         joint_pos = joint_pos.squeeze(0)
@@ -532,8 +540,8 @@ class GarmentEnv(DirectRLEnv):
         # Reset cached reward on episode reset
         self._last_computed_reward = 0.0
 
-        left_joint_pos = self.left_arm.data.default_joint_pos[env_ids]
-        right_joint_pos = self.right_arm.data.default_joint_pos[env_ids]
+        left_joint_pos = _to_torch(self.left_arm.data.default_joint_pos)[env_ids]
+        right_joint_pos = _to_torch(self.right_arm.data.default_joint_pos)[env_ids]
         self.left_arm.write_joint_position_to_sim(
             left_joint_pos, joint_ids=None, env_ids=env_ids
         )
@@ -543,6 +551,9 @@ class GarmentEnv(DirectRLEnv):
 
         # Reset the garment object
         if self.object is not None:
+            if not self._obs_initialized:
+                self.initialize_obs()
+                self._obs_initialized = True
             self.object.reset()
 
         # Apply randomization if enabled in config
