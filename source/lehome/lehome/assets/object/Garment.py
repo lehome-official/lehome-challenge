@@ -9,7 +9,7 @@ from omegaconf import DictConfig, ListConfig
 import omni.kit.commands
 import isaacsim.core.utils.prims as prims_utils
 from isaacsim.core.prims import SingleClothPrim, SingleParticleSystem, SingleXFormPrim
-from isaacsim.core.api.materials.particle_material import ParticleMaterial
+from isaacsim.core.api.materials.particle_material import ParticleMaterial as _ParticleMaterial
 from isaacsim.core.api.materials.preview_surface import PreviewSurface
 from isaacsim.core.utils.stage import add_reference_to_stage
 from isaacsim.core.utils.string import find_unique_string_name
@@ -25,6 +25,16 @@ from lehome.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+class ParticleMaterial(_ParticleMaterial):
+    """ParticleMaterial fallback for IsaacLab's patched SimulationManager."""
+
+    def __init__(self, *args, **kwargs):
+        self._backend = SimulationManager.get_backend()
+        self._device = SimulationManager.get_physics_sim_device()
+        self._backend_utils = SimulationManager._get_backend_utils()
+        super().__init__(*args, **kwargs)
+
+
 class GarmentObject(SingleClothPrim):
     """
     GarmentObject class that wraps the Isaac Sim SingleCloth prim functionality.
@@ -34,6 +44,27 @@ class GarmentObject(SingleClothPrim):
         - garment_config (from JSON): Highest priority, garment-specific settings
         - objects_config.common (from YAML): Fallback, default settings
     """
+
+    @staticmethod
+    def _core_pose(value):
+        """Convert pose values for Isaac Sim core prim wrappers."""
+        if torch.is_tensor(value):
+            return value.detach().cpu().numpy()
+        return np.asarray(value, dtype=np.float32)
+
+    def set_world_pose(self, position=None, orientation=None):
+        """Set world pose using the wrapped prim view's backend."""
+        if position is not None:
+            position = self._prim_view._backend_utils.convert(
+                self._core_pose(position), device=self._prim_view._device
+            )
+            position = self._prim_view._backend_utils.expand_dims(position, 0)
+        if orientation is not None:
+            orientation = self._prim_view._backend_utils.convert(
+                self._core_pose(orientation), device=self._prim_view._device
+            )
+            orientation = self._prim_view._backend_utils.expand_dims(orientation, 0)
+        self._prim_view.set_world_poses(positions=position, orientations=orientation)
 
     def __init__(
         self,
@@ -380,12 +411,7 @@ class GarmentObject(SingleClothPrim):
         """
         logger.debug("[GarmentObject] Performing soft reset")
         # Reset Points Positions
-        if self._device == "cpu":
-            self._prim.GetAttribute("points").Set(
-                Vt.Vec3fArray.FromNumpy(self.initial_points_positions)
-            )
-        else:
-            self._cloth_prim_view.set_world_positions(self.initial_points_positions)
+        self._prim.GetAttribute("points").Set(Vt.Vec3fArray.FromNumpy(self.initial_points_positions))
 
         # Get position range from configuration
         pos_reset_range, pos_source = self._get_config_value(
@@ -649,12 +675,7 @@ class GarmentObject(SingleClothPrim):
         """
         Return the initial positions of all particles that make up the object.
         """
-        if self._device == "cpu":
-            self.initial_points_positions = (
-                self._get_points_pose().detach().cpu().numpy()
-            )
-        else:
-            self.initial_points_positions = self._cloth_prim_view.get_world_positions()
+        self.initial_points_positions = self._get_points_pose().detach().cpu().numpy()
 
     def transform_points(self, points, pos, ori, scale):
         """
@@ -701,12 +722,7 @@ class GarmentObject(SingleClothPrim):
             self.set_world_pose(
                 [0.0, 0.0, 0.0], euler_angles_to_quat([0.0, 0.0, 0.0], degrees=True)
             )
-            if self._device == "cpu":
-                self._prim.GetAttribute("points").Set(
-                    Vt.Vec3fArray.FromNumpy(self.initial_points_positions)
-                )
-            else:
-                self._cloth_prim_view.set_world_positions(self.initial_points_positions)
+            self._prim.GetAttribute("points").Set(Vt.Vec3fArray.FromNumpy(self.initial_points_positions))
             self.set_world_pose(pos, euler_angles_to_quat(ori, degrees=True))
             self.reset_pose = np.array(pose, dtype=np.float32)
 
